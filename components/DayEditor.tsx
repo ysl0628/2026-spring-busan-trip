@@ -50,10 +50,10 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
 
     const cleanupDraggable = handleRef.current
       ? draggable({
-          element: handleRef.current,
-          getInitialData: () => ({ type: 'day-item', index })
-        })
-      : () => {};
+        element: handleRef.current,
+        getInitialData: () => ({ type: 'day-item', index })
+      })
+      : () => { };
 
     const cleanupDropTarget = dropTargetForElements({
       element,
@@ -78,9 +78,8 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
   return (
     <div
       ref={rowRef}
-      className={`rounded-2xl border border-slate-100 bg-slate-50/60 p-4 ${
-        isDragOver ? 'border-2 border-blue-500' : ''
-      }`}
+      className={`rounded-2xl border border-slate-100 bg-slate-50/60 p-4 ${isDragOver ? 'border-2 border-blue-500' : ''
+        }`}
     >
       <div className="flex items-center gap-3">
         <button
@@ -153,18 +152,6 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
             placeholder="Naver place id"
             className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
           />
-          <input
-            value={item.coords?.lat ?? ''}
-            onChange={(event) => onChange({ coords: { lat: Number(event.target.value), lng: item.coords?.lng ?? 0 } })}
-            placeholder="Lat"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-          />
-          <input
-            value={item.coords?.lng ?? ''}
-            onChange={(event) => onChange({ coords: { lat: item.coords?.lat ?? 0, lng: Number(event.target.value) } })}
-            placeholder="Lng"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-          />
           <button
             type="button"
             onClick={onRemove}
@@ -232,17 +219,10 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
   }), [draft]);
 
   return (
-    <div className="mt-4">
+    <div>
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-3">
-            <input
-              value={draft.title}
-              onChange={(event) => setDraft({ ...draft, title: event.target.value })}
-              placeholder="Day title"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 min-w-[12rem]"
-            />
-          </div>
+          <p className="text-md font-bold text-slate-800">{draft.title}</p>
         </div>
         <div className="text-xs font-bold text-slate-400">
           {isSaving ? 'Saving...' : ' '}
@@ -251,7 +231,7 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
 
       {saveError && <p className="mt-3 text-sm font-bold text-red-500">{saveError}</p>}
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-2 space-y-4">
         {draft.items.map((item, index) => (
           <ItemRow
             key={item.id || index}

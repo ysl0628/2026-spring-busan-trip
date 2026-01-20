@@ -6,7 +6,7 @@ const SHEET_API_URL =
   import.meta.env.VITE_SHEET_API_URL ||
   (import.meta.env.DEV
     ? '/sheet'
-    : 'https://script.google.com/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec');
+    : 'https://script.google.com/macros/s/AKfycbwwX0F7AqRreLHoCt1qkdI5xyH3wbVow87AQ361M63n0PB_DDhuEiJORtYENhmsVGFk/exec');
 
 type SheetRow = {
   id?: string;
@@ -31,6 +31,21 @@ const cleanCell = (value?: string) => {
   return value.startsWith("'") ? value.slice(1) : value;
 };
 
+const normalizeTime = (value?: string) => {
+  if (!value) return '';
+  const cleaned = cleanCell(value);
+  if (!cleaned) return '';
+  if (cleaned.includes('T')) {
+    const parsed = new Date(cleaned);
+    if (!Number.isNaN(parsed.getTime())) {
+      const hours = String(parsed.getHours()).padStart(2, '0');
+      const minutes = String(parsed.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+  }
+  return cleaned;
+};
+
 const toNumber = (value?: string | number) => {
   if (value === null || value === undefined || value === '') return undefined;
   const num = Number(value);
@@ -48,6 +63,8 @@ const postJson = async (payload: Record<string, unknown>) => {
     throw new Error(text || `HTTP ${response.status}`);
   }
 };
+
+const deleteById = async (id: string) => postJson({ action: 'delete', id });
 
 const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
   const coords = item.coords;
@@ -124,7 +141,7 @@ export const useSheetData = () => {
           const item: ScheduleItem = {
             id: row.id,
             order: toNumber(row.order),
-            time: cleanCell(row.time),
+            time: normalizeTime(row.time),
             title: cleanCell(row.title),
             description: cleanCell(row.description),
             type: (row.type as ScheduleItem['type']) || 'other',
@@ -227,32 +244,24 @@ export const useSheetData = () => {
       const orderChanged = currentOrder.length === nextOrder.length &&
         currentOrder.some((id, index) => id !== nextOrder[index]);
 
-      if (orderChanged) {
-        for (const id of currentOrder) {
-          await postJson({ action: 'delete', id });
+      // Delete removed items only.
+      for (const [id] of currentItemsById) {
+        if (!nextItemsById.has(id)) {
+          await deleteById(id);
         }
-        for (const item of withOrder) {
-          await postJson(toSheetRow(day, item, item.order ?? 0));
-        }
-      } else {
-        // Delete removed items only.
-        for (const [id] of currentItemsById) {
-          if (!nextItemsById.has(id)) {
-            await postJson({ action: 'delete', id });
-          }
-        }
+      }
 
-        // Update changed items (delete + add) and add new ones.
-        for (const item of withOrder) {
-          if (!item.id) continue;
-          const previous = currentItemsById.get(item.id);
-          const dayMetaChanged = current ? (current.date !== day.date || current.title !== day.title) : true;
-          if (!previous || !sameItem(previous, item) || dayMetaChanged) {
-            if (previous) {
-              await postJson({ action: 'delete', id: item.id });
-            }
-            await postJson(toSheetRow(day, item, item.order ?? 0));
+      // Update changed items (delete + add) and add new ones.
+      for (const item of withOrder) {
+        if (!item.id) continue;
+        const previous = currentItemsById.get(item.id);
+        const dayMetaChanged = current ? (current.date !== day.date || current.title !== day.title) : true;
+        const orderOnlyChanged = orderChanged && previous && (previous.order ?? 0) !== (item.order ?? 0);
+        if (!previous || !sameItem(previous, item) || dayMetaChanged || orderOnlyChanged) {
+          if (previous) {
+            await deleteById(item.id);
           }
+          await postJson(toSheetRow(day, item, item.order ?? 0));
         }
       }
 
@@ -279,7 +288,7 @@ export const useSheetData = () => {
       if (current) {
         for (const item of current.items) {
           if (!item.id) continue;
-          await postJson({ action: 'delete', id: item.id });
+          await deleteById(item.id);
         }
       }
       setItinerary((prev) => prev.filter(item => item.day !== dayNumber));

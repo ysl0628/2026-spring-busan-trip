@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
             target: 'https://script.google.com',
             changeOrigin: true,
             secure: true,
-            rewrite: () => '/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec'
+            rewrite: () => '/macros/s/AKfycbwwX0F7AqRreLHoCt1qkdI5xyH3wbVow87AQ361M63n0PB_DDhuEiJORtYENhmsVGFk/exec'
           }
         }
       },
