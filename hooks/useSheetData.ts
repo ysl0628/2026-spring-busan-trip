@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { DaySchedule, Restaurant, ScheduleItem, Spot } from '../types';
 import { ITINERARY } from '../constants';
 
-const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec';
+const SHEET_API_URL =
+  import.meta.env.VITE_SHEET_API_URL ||
+  (import.meta.env.DEV
+    ? '/sheet'
+    : 'https://script.google.com/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec');
 
 type SheetRow = {
   id?: string;
@@ -201,7 +205,10 @@ export const useSheetData = () => {
         return updated.sort((a, b) => a.day - b.day);
       });
     } catch (error) {
-      setSaveError('Failed to save day.');
+      const message = error instanceof Error ? error.message : 'Failed to save day.';
+      setSaveError(message);
+      // eslint-disable-next-line no-console
+      console.error('Save day failed:', error);
     } finally {
       setIsSaving(false);
     }

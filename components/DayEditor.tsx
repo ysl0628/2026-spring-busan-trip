@@ -1,6 +1,13 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { DaySchedule, ScheduleItem } from '../types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 type DayEditorProps = {
   day: DaySchedule;
@@ -87,18 +94,22 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, onChange, onRemove, onMo
           placeholder="Description"
           className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
         />
-        <select
+        <Select
           value={item.type}
-          onChange={(event) => onChange({ type: event.target.value as ScheduleItem['type'] })}
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+          onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
         >
-          <option value="flight">flight</option>
-          <option value="spot">spot</option>
-          <option value="food">food</option>
-          <option value="transport">transport</option>
-          <option value="hotel">hotel</option>
-          <option value="other">other</option>
-        </select>
+          <SelectTrigger>
+            <SelectValue placeholder="類型" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="flight">航班</SelectItem>
+            <SelectItem value="spot">景點</SelectItem>
+            <SelectItem value="food">美食</SelectItem>
+            <SelectItem value="transport">交通</SelectItem>
+            <SelectItem value="hotel">住宿</SelectItem>
+            <SelectItem value="other">其他</SelectItem>
+          </SelectContent>
+        </Select>
         <input
           value={item.naverPlaceId || ''}
           onChange={(event) => onChange({ naverPlaceId: event.target.value })}
@@ -120,7 +131,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, onChange, onRemove, onMo
         <button
           type="button"
           onClick={onRemove}
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-500 hover:text-red-500"
+          className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300"
         >
           Remove
         </button>
@@ -173,7 +184,6 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
     <div className="mt-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-3">
-          <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Day {draft.day}</label>
           <div className="flex flex-wrap gap-3">
             <input
               value={draft.date}

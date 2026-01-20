@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/sheet': {
+            target: 'https://script.google.com',
+            changeOrigin: true,
+            secure: true,
+            rewrite: () => '/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec'
+          }
+        }
       },
       plugins: [react()],
       define: {
