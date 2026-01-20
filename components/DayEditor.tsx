@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
 import {
   Select,
@@ -37,9 +37,21 @@ type ItemRowProps = {
   onRemove: () => void;
   onMove: (from: number, to: number) => void;
   onToggle: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 };
 
-const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, onRemove, onMove, onToggle }) => {
+const ItemRow: React.FC<ItemRowProps> = ({
+  item,
+  index,
+  isExpanded,
+  onChange,
+  onRemove,
+  onMove,
+  onToggle,
+  canMoveUp,
+  canMoveDown
+}) => {
   const rowRef = React.useRef<HTMLDivElement>(null);
   const handleRef = React.useRef<HTMLButtonElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -85,11 +97,31 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
         <button
           type="button"
           ref={handleRef}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing"
+          className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing"
           aria-label="Drag to reorder"
         >
           <GripVertical className="h-4 w-4" />
         </button>
+        <div className="flex flex-col gap-1 sm:hidden">
+          <button
+            type="button"
+            onClick={() => canMoveUp && onMove(index, index - 1)}
+            disabled={!canMoveUp}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 disabled:opacity-40"
+            aria-label="Move up"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => canMoveDown && onMove(index, index + 1)}
+            disabled={!canMoveDown}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:text-slate-600 disabled:opacity-40"
+            aria-label="Move down"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+        </div>
         <button
           type="button"
           onClick={onToggle}
@@ -177,7 +209,7 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
     const nextExpanded: Record<string, boolean> = {};
     day.items.forEach((item, index) => {
       const key = item.id || `index-${index}`;
-      nextExpanded[key] = true;
+      nextExpanded[key] = false;
     });
     setExpandedItems(nextExpanded);
   }, [day]);
@@ -253,6 +285,8 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
               const key = item.id || `index-${index}`;
               setExpandedItems((current) => ({ ...current, [key]: !current[key] }));
             }}
+            canMoveUp={index > 0}
+            canMoveDown={index < draft.items.length - 1}
           />
         ))}
       </div>
