@@ -26,6 +26,7 @@ export interface Spot extends LocationCoords {
   category: string;
   imageUrl: string;
   link?: string;
+  naverPlaceId?: string;
   tags?: string[];
 }
 
@@ -37,6 +38,7 @@ export interface Restaurant extends LocationCoords {
   recommendation?: string;
   imageUrl: string;
   category: 'bbq' | 'gukbap' | 'seafood' | 'market' | 'cafe' | 'bread' | 'other';
+  naverPlaceId?: string;
 }
 
 export interface ScheduleItem {
@@ -47,6 +49,7 @@ export interface ScheduleItem {
   duration?: string;
   location?: string;
   coords?: LocationCoords;
+  naverPlaceId?: string;
 }
 
 export interface DaySchedule {

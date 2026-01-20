@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Calendar, 
   Plane, 
@@ -13,8 +13,8 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import { TabType } from './types';
-import { FLIGHTS, ITINERARY, SPOTS, FOOD, MEMBERS } from './constants';
+import { TabType, LocationCoords, DaySchedule, Spot, Restaurant, ScheduleItem } from './types';
+import { FLIGHTS, ITINERARY, MEMBERS } from './constants';
 import AppIcon from './components/AppIcon';
 import FoodCategoryIcon from './components/FoodCategoryIcon';
 import MiniMap from './components/MiniMap';
@@ -22,16 +22,166 @@ import SidebarItem from './components/SidebarItem';
 import NavItem from './components/NavItem';
 import InfoCard from './components/InfoCard';
 
+const getNaverMapLink = (placeId?: string, coords?: LocationCoords) => {
+  if (placeId) {
+    return `https://map.naver.com/p/entry/place/${placeId}`;
+  }
+  if (coords) {
+    return `https://map.naver.com/v5/search/${coords.lat},${coords.lng}`;
+  }
+  return '#';
+};
+
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxDap_R1NV5Z3FsmjrRmaRjWA0Gw1s4y8mxVrY_dkWTQ-rFqa9GxRFH5zqwFk2thNc_hw/exec';
+
+type SheetRow = {
+  id?: string;
+  day?: string | number;
+  date?: string;
+  time?: string;
+  title?: string;
+  description?: string;
+  type?: string;
+  naverPlaceId?: string;
+  lat?: string | number;
+  lng?: string | number;
+  tags?: string;
+  imageUrl?: string;
+  category?: string;
+  dayTitle?: string;
+};
+
+const cleanCell = (value?: string) => {
+  if (!value) return '';
+  return value.startsWith("'") ? value.slice(1) : value;
+};
+
+const toNumber = (value?: string | number) => {
+  if (value === null || value === undefined || value === '') return undefined;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : undefined;
+};
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.ITINERARY);
   const [expandedDay, setExpandedDay] = useState<number>(1);
+  const [itinerary, setItinerary] = useState<DaySchedule[]>([]);
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [food, setFood] = useState<Restaurant[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>('');
+
+  useEffect(() => {
+    const loadSheet = async () => {
+      try {
+        const response = await fetch(SHEET_API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const payload = await response.json();
+        const rows = Array.isArray(payload?.data) ? payload.data as SheetRow[] : [];
+
+        const dayTitleMap = ITINERARY.reduce<Record<number, string>>((acc, day) => {
+          acc[day.day] = day.title;
+          return acc;
+        }, {});
+
+        const scheduleItems = rows.filter(row => row.day !== '' && row.day !== undefined && row.day !== null);
+        const grouped: Record<number, { date: string; title: string; items: ScheduleItem[] }> = {};
+
+        scheduleItems.forEach(row => {
+          const dayNum = Number(row.day);
+          if (!Number.isFinite(dayNum)) return;
+          const date = cleanCell(row.date);
+          const title = cleanCell(row.dayTitle) || dayTitleMap[dayNum] || '';
+          const coords = (row.lat || row.lng) ? { lat: toNumber(row.lat) ?? 0, lng: toNumber(row.lng) ?? 0 } : undefined;
+
+          const item: ScheduleItem = {
+            time: cleanCell(row.time),
+            title: cleanCell(row.title),
+            description: cleanCell(row.description),
+            type: (row.type as ScheduleItem['type']) || 'other',
+            naverPlaceId: row.naverPlaceId || undefined,
+            coords
+          };
+
+          if (!grouped[dayNum]) {
+            grouped[dayNum] = { date, title, items: [] };
+          }
+
+          grouped[dayNum].items.push(item);
+        });
+
+        const itineraryData = Object.keys(grouped)
+          .map(day => Number(day))
+          .sort((a, b) => a - b)
+          .map(day => ({
+            day,
+            date: grouped[day].date,
+            title: grouped[day].title,
+            items: grouped[day].items
+          }));
+
+        const spotRows = rows.filter(row => row.type === 'spot' && (row.day === '' || row.day === undefined || row.day === null));
+        const spotData: Spot[] = spotRows.map(row => ({
+          id: row.id || '',
+          name: cleanCell(row.title),
+          description: cleanCell(row.description),
+          category: cleanCell(row.category),
+          imageUrl: row.imageUrl || '',
+          tags: row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+          lat: toNumber(row.lat) ?? 0,
+          lng: toNumber(row.lng) ?? 0,
+          naverPlaceId: row.naverPlaceId || undefined
+        }));
+
+        const foodRows = rows.filter(row => row.type === 'food' && (row.day === '' || row.day === undefined || row.day === null));
+        const foodData: Restaurant[] = foodRows.map(row => ({
+          id: row.id || '',
+          name: cleanCell(row.title),
+          description: cleanCell(row.description),
+          category: (row.category as Restaurant['category']) || 'other',
+          imageUrl: row.imageUrl || '',
+          lat: toNumber(row.lat) ?? 0,
+          lng: toNumber(row.lng) ?? 0,
+          naverPlaceId: row.naverPlaceId || undefined
+        }));
+
+        setItinerary(itineraryData);
+        setSpots(spotData);
+        setFood(foodData);
+        setLoadError('');
+      } catch (error) {
+        setLoadError('Failed to load sheet data.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSheet();
+  }, []);
 
   const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="py-10 text-center text-slate-400 font-bold">
+          Loading trip data...
+        </div>
+      );
+    }
+    if (loadError) {
+      return (
+        <div className="py-10 text-center text-red-500 font-bold">
+          {loadError}
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case TabType.ITINERARY:
         return (
           <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto mt-4 md:mt-0">
-            {ITINERARY.map((day) => (
+            {itinerary.map((day) => (
               <div key={day.day} className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100 hover:shadow-md transition-shadow">
                 <button 
                   onClick={() => setExpandedDay(expandedDay === day.day ? -1 : day.day)}
@@ -60,9 +210,9 @@ const App: React.FC = () => {
                             <div className="flex-1 pb-4">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-bold text-slate-400 font-mono tracking-tighter">{item.time}</span>
-                                {item.coords && (
+                                {(item.naverPlaceId || item.coords) && (
                                   <a 
-                                    href={`https://map.naver.com/v5/search/${item.coords.lat},${item.coords.lng}`} 
+                                    href={getNaverMapLink(item.naverPlaceId, item.coords)} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50 transition-colors"
@@ -132,7 +282,7 @@ const App: React.FC = () => {
       case TabType.SPOTS:
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fadeIn mt-4 md:mt-0">
-            {SPOTS.map((spot) => (
+            {spots.map((spot) => (
               <div key={spot.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all hover:-translate-y-1 group">
                 <div className="relative h-56 overflow-hidden">
                   <img src={spot.imageUrl} alt={spot.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -140,7 +290,7 @@ const App: React.FC = () => {
                      <span className="text-white text-xs font-bold">點擊詳細資訊</span>
                   </div>
                   <div className="absolute top-4 right-4 bg-white/95 p-2 rounded-2xl shadow-xl hover:bg-blue-600 hover:text-white transition-colors">
-                    <a href={`https://map.naver.com/v5/search/${spot.lat},${spot.lng}`} target="_blank" rel="noopener noreferrer">
+                    <a href={getNaverMapLink(spot.naverPlaceId, spot)} target="_blank" rel="noopener noreferrer">
                       <MapPin className="w-5 h-5" />
                     </a>
                   </div>
@@ -168,7 +318,7 @@ const App: React.FC = () => {
       case TabType.FOOD:
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fadeIn mt-4 md:mt-0">
-            {FOOD.map((food) => (
+            {food.map((food) => (
               <div key={food.id} className="bg-white rounded-3xl p-6 flex flex-col gap-4 shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
                 <div className="h-40 w-full mb-2">
                   <FoodCategoryIcon category={food.category} />
@@ -177,7 +327,7 @@ const App: React.FC = () => {
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-black text-slate-800 text-lg truncate group-hover:text-orange-600 transition-colors">{food.name}</h3>
                     <a 
-                      href={`https://map.naver.com/v5/search/${food.lat},${food.lng}`} 
+                      href={getNaverMapLink(food.naverPlaceId, food)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-orange-500 hover:text-orange-700 p-1.5 hover:bg-orange-50 rounded-xl transition-all"

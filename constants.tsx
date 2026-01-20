@@ -85,7 +85,7 @@ export const ITINERARY: DaySchedule[] = [
       { time: '12:30', title: '午餐：南浦洞區域', description: '國際市場、富平罐頭市場小吃', type: 'food' },
       { time: '14:30', title: 'BIFF 廣場', description: '必吃昇基堅果黑糖餅', type: 'spot' },
       { time: '16:00', title: 'Lotte Premium Outlets', description: '東釜山店購物', type: 'spot', coords: { lat: 35.191, lng: 129.213 } },
-      { time: '19:30', title: '釜山塔', description: '欣賞城市夜景', type: 'spot', coords: { lat: 35.101, lng: 129.032 } }
+      { time: '19:30', title: '釜山塔', description: '欣賞城市夜景', type: 'spot', coords: { lat: 35.101, lng: 129.032 }, naverPlaceId: '20058995' }
     ]
   },
   {
@@ -124,7 +124,7 @@ export const SPOTS: Spot[] = [
   { id: 'intermarket', name: '國際市場/富平罐頭市場', description: '道地釜山市場體驗。', imageUrl: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=600', category: '購物', tags: ['小吃'], lat: 35.101, lng: 129.027 },
   { id: 'biff', name: 'BIFF 廣場', description: '電影殿堂與黑糖餅。', imageUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=600', category: '文化', tags: ['美食'], lat: 35.098, lng: 129.026 },
   { id: 'lotteoutlet', name: 'Lotte Premium Outlets', description: '東釜山店，精品購物。', imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=600', category: '購物', tags: ['血拼'], lat: 35.191, lng: 129.213 },
-  { id: 'busantower', name: '釜山塔', description: '釜山市中心地標。', imageUrl: 'https://images.unsplash.com/photo-1531266752426-aad4966a757d?auto=format&fit=crop&q=80&w=600', category: '地標', tags: ['夜景'], lat: 35.101, lng: 129.032 },
+  { id: 'busantower', name: '釜山塔', description: '釜山市中心地標。', imageUrl: 'https://images.unsplash.com/photo-1531266752426-aad4966a757d?auto=format&fit=crop&q=80&w=600', category: '地標', tags: ['夜景'], lat: 35.101, lng: 129.032, naverPlaceId: '20058995' },
   { id: 'sealife', name: 'SEA LIFE 釜山水族館', description: '海雲台親子景點。', imageUrl: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&q=80&w=600', category: '樂園', tags: ['親子'], lat: 35.159, lng: 129.161 },
   { id: 'xthesky', name: 'BUSAN X the SKY', description: '100層樓高的震撼。', imageUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=600', category: '地標', tags: ['高空'], lat: 35.158, lng: 129.169 },
   { id: 'centumcity', name: '新世界百貨 Centum City', description: '世界最大百貨公司。', imageUrl: 'https://images.unsplash.com/photo-1481437156560-3201fb1ff997?auto=format&fit=crop&q=80&w=600', category: '購物', tags: ['豪華'], lat: 35.169, lng: 129.130 },
