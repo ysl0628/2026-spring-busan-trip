@@ -14,7 +14,7 @@ const SpotsView: React.FC<SpotsViewProps> = ({ spots }) => (
         <div className="relative h-56 overflow-hidden">
           <img src={spot.imageUrl} alt={spot.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-             <span className="text-white text-xs font-bold">é»žæ?è©³ç´°è³‡è?</span>
+             <span className="text-white text-xs font-bold">點擊查看地圖</span>
           </div>
           <div className="absolute top-4 right-4 bg-white/95 p-2 rounded-2xl shadow-xl hover:bg-blue-600 hover:text-white transition-colors">
             <a href={getNaverMapLink(spot.naverPlaceId, spot)} target="_blank" rel="noopener noreferrer">

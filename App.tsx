@@ -22,7 +22,7 @@ import { useSheetData } from './hooks/useSheetData';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.ITINERARY);
   const [expandedDay, setExpandedDay] = useState<number>(1);
-  const { itinerary, spots, food, isLoading, loadError } = useSheetData();
+  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay } = useSheetData();
 
   const renderContent = () => {
     if (isLoading) {
@@ -47,6 +47,9 @@ const App: React.FC = () => {
             itinerary={itinerary}
             expandedDay={expandedDay}
             onToggleDay={setExpandedDay}
+            onSaveDay={saveDay}
+            isSaving={isSaving}
+            saveError={saveError}
           />
         );
       case TabType.FLIGHT:
@@ -76,7 +79,7 @@ const App: React.FC = () => {
           <SidebarItem icon={<Info />} label="行前必知" isActive={activeTab === TabType.INFO} onClick={() => setActiveTab(TabType.INFO)} />
         </nav>
         <div className="p-6 border-t border-slate-100 hidden lg:block">
-           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Family Busan 2025</p>
+           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Family Busan 2026</p>
         </div>
       </aside>
 
