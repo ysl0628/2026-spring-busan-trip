@@ -22,20 +22,20 @@ const FlightsView: React.FC<FlightsViewProps> = ({ flights }) => (
             <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">{flight.airline} {flight.aircraft}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-left flex-1">
-            <p className="text-4xl font-black text-slate-900 font-mono tracking-tighter">{flight.departureTime.split(' ')[1]}</p>
-            <p className="text-sm font-bold text-slate-500 mt-2 min-h-[3rem]">{flight.departureAirport}</p>
+        <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <div className="w-full max-w-[220px] text-center sm:text-left sm:max-w-none sm:w-auto">
+            <p className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tighter">{flight.departureTime.split(' ')[1]}</p>
+            <p className="text-sm font-bold text-slate-500 mt-2">{flight.departureAirport}</p>
           </div>
-          <div className="flex-none px-4 flex flex-col items-center justify-center">
-            <span className="text-[10px] font-black text-slate-300 mb-2 uppercase tracking-tighter">{flight.duration}</span>
-            <div className="w-16 h-0.5 bg-slate-100 relative rounded-full">
-              <div className="w-2 h-2 bg-blue-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <div className="flex items-center gap-4 sm:flex-col sm:gap-2">
+            <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">{flight.duration}</span>
+            <div className="w-0.5 h-16 sm:w-16 sm:h-0.5 bg-slate-100 relative rounded-full">
+              <div className="w-2 h-2 bg-blue-500 rounded-full absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
-          <div className="text-right flex-1">
-            <p className="text-4xl font-black text-slate-900 font-mono tracking-tighter">{flight.arrivalTime.split(' ')[1]}</p>
-            <p className="text-sm font-bold text-slate-500 mt-2 min-h-[3rem]">{flight.arrivalAirport}</p>
+          <div className="w-full max-w-[220px] text-center sm:text-right sm:max-w-none sm:w-auto">
+            <p className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tighter">{flight.arrivalTime.split(' ')[1]}</p>
+            <p className="text-sm font-bold text-slate-500 mt-2">{flight.arrivalAirport}</p>
           </div>
         </div>
         <div className="mt-8 pt-6 border-t border-slate-50 flex justify-between items-center text-xs font-bold text-slate-400">

@@ -86,11 +86,10 @@ const App: React.FC = () => {
       {/* Main content area */}
       <div className="flex-1 md:ml-20 lg:ml-64 pb-16 md:pb-8 flex flex-col min-h-0">
         <header className="px-6 py-4 md:px-12 md:py-12 bg-white/60 backdrop-blur-md sticky top-0 z-40 md:static md:bg-transparent">
-          <div className="max-w-7xl mx-auto flex flex-row items-start justify-between gap-4">
-            <div className="flex items-center flex-col gap-3">
+          <div className="max-w-7xl mx-auto flex flex-row items-start justify-between items-center gap-4">
+            <div className="flex items-center flex-row md:flex-col gap-3">
               <div className="flex items-center gap-3 md:hidden md:mb-2">
                 <AppIcon size={24} />
-                <span className="font-black text-slate-900">Busan 2025</span>
               </div>
               <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight">
                 {activeTab === TabType.ITINERARY && '行程規劃'}
@@ -101,7 +100,7 @@ const App: React.FC = () => {
               </h2>
               </div>
               <p className="text-slate-400 font-bold mt-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> 2025.02.26 - 03.03 釜山漫遊
+                <Calendar className="w-4 h-4" /> 2025.02.26 - 03.03
               </p>
             </div>
         </header>
@@ -126,6 +125,7 @@ const App: React.FC = () => {
 };
 
 export default App;
+
 
 
 

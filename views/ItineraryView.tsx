@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Pencil } from 'lucide-react';
 import { DaySchedule } from '../types';
 import MiniMap from '../components/MiniMap';
 import DayEditor, { DayEditorHandle } from '../components/DayEditor';
@@ -84,16 +84,9 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
               className="flex-1 text-left"
             >
               <span className="text-xs font-bold uppercase tracking-widest opacity-80">Day {day.day}</span>
-              <h3 className="text-xl font-bold">{day.date} - {day.title}</h3>
+              <h3 className="text-base font-bold sm:text-lg md:text-xl">{day.date} - {day.title}</h3>
             </button>
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setActiveEditorDay(day)}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-widest hover:bg-white/20"
-              >
-                Edit
-              </button>
               <button
                 onClick={() => onToggleDay(expandedDay === day.day ? -1 : day.day)}
                 className="rounded-full bg-white/10 p-2 hover:bg-white/20"
@@ -103,7 +96,16 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
             </div>
           </div>
           {expandedDay === day.day && (
-            <div className="p-6 space-y-6 animate-slideDown bg-slate-50/50">
+            <div className="relative p-6 animate-slideDown bg-slate-50/50">
+              <button
+                type="button"
+                onClick={() => setActiveEditorDay(day)}
+                aria-label="Edit day"
+                className="absolute right-6 top-6 rounded-full bg-slate-900/5 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-900/10 sm:px-3"
+              >
+                <span className="hidden sm:inline">Edit</span>
+                <Pencil className="w-4 h-4 sm:hidden" />
+              </button>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   {day.items.map((item, idx) => (
