@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
 import {
   Select,
@@ -30,23 +31,28 @@ const emptyItem = (): ScheduleItem => ({
 type ItemRowProps = {
   item: ScheduleItem;
   index: number;
+  isExpanded: boolean;
   onChange: (patch: Partial<ScheduleItem>) => void;
   onRemove: () => void;
   onMove: (from: number, to: number) => void;
+  onToggle: () => void;
 };
 
-const ItemRow: React.FC<ItemRowProps> = ({ item, index, onChange, onRemove, onMove }) => {
+const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, onRemove, onMove, onToggle }) => {
   const rowRef = React.useRef<HTMLDivElement>(null);
+  const handleRef = React.useRef<HTMLButtonElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     const element = rowRef.current;
     if (!element) return;
 
-    const cleanupDraggable = draggable({
-      element,
-      getInitialData: () => ({ type: 'day-item', index })
-    });
+    const cleanupDraggable = handleRef.current
+      ? draggable({
+          element: handleRef.current,
+          getInitialData: () => ({ type: 'day-item', index })
+        })
+      : () => {};
 
     const cleanupDropTarget = dropTargetForElements({
       element,
@@ -71,83 +77,121 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, onChange, onRemove, onMo
   return (
     <div
       ref={rowRef}
-      className={`rounded-2xl border border-slate-100 bg-slate-50/60 p-4 cursor-grab active:cursor-grabbing ${
-        isDragOver ? 'outline outline-2 outline-blue-400' : ''
+      className={`rounded-2xl border border-slate-100 bg-slate-50/60 p-4 ${
+        isDragOver ? 'border-t-2 border-t-blue-500' : ''
       }`}
     >
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
-        <input
-          value={item.time}
-          onChange={(event) => onChange({ time: event.target.value })}
-          placeholder="Time"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-        />
-        <input
-          value={item.title}
-          onChange={(event) => onChange({ title: event.target.value })}
-          placeholder="Title"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
-        />
-        <input
-          value={item.description}
-          onChange={(event) => onChange({ description: event.target.value })}
-          placeholder="Description"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
-        />
-        <Select
-          value={item.type}
-          onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="類型" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="flight">航班</SelectItem>
-            <SelectItem value="spot">景點</SelectItem>
-            <SelectItem value="food">美食</SelectItem>
-            <SelectItem value="transport">交通</SelectItem>
-            <SelectItem value="hotel">住宿</SelectItem>
-            <SelectItem value="other">其他</SelectItem>
-          </SelectContent>
-        </Select>
-        <input
-          value={item.naverPlaceId || ''}
-          onChange={(event) => onChange({ naverPlaceId: event.target.value })}
-          placeholder="Naver place id"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
-        />
-        <input
-          value={item.coords?.lat ?? ''}
-          onChange={(event) => onChange({ coords: { lat: Number(event.target.value), lng: item.coords?.lng ?? 0 } })}
-          placeholder="Lat"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-        />
-        <input
-          value={item.coords?.lng ?? ''}
-          onChange={(event) => onChange({ coords: { lat: item.coords?.lat ?? 0, lng: Number(event.target.value) } })}
-          placeholder="Lng"
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-        />
+      <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={onRemove}
-          className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300"
+          ref={handleRef}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing"
+          aria-label="Drag to reorder"
         >
-          Remove
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex-1 text-left"
+        >
+          <div className="text-sm font-bold text-slate-800">
+            {item.time || 'Time'} · {item.title || 'Title'}
+          </div>
+          <div className="text-xs text-slate-400 truncate">{item.description || 'Description'}</div>
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-600"
+          aria-label="Toggle details"
+        >
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       </div>
+
+      {isExpanded && (
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-7">
+          <input
+            value={item.time}
+            onChange={(event) => onChange({ time: event.target.value })}
+            placeholder="Time"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+          />
+          <input
+            value={item.title}
+            onChange={(event) => onChange({ title: event.target.value })}
+            placeholder="Title"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
+          />
+          <input
+            value={item.description}
+            onChange={(event) => onChange({ description: event.target.value })}
+            placeholder="Description"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
+          />
+          <Select
+            value={item.type}
+            onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="類型" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="flight">航班</SelectItem>
+              <SelectItem value="spot">景點</SelectItem>
+              <SelectItem value="food">美食</SelectItem>
+              <SelectItem value="transport">交通</SelectItem>
+              <SelectItem value="hotel">住宿</SelectItem>
+              <SelectItem value="other">其他</SelectItem>
+            </SelectContent>
+          </Select>
+          <input
+            value={item.naverPlaceId || ''}
+            onChange={(event) => onChange({ naverPlaceId: event.target.value })}
+            placeholder="Naver place id"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
+          />
+          <input
+            value={item.coords?.lat ?? ''}
+            onChange={(event) => onChange({ coords: { lat: Number(event.target.value), lng: item.coords?.lng ?? 0 } })}
+            placeholder="Lat"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+          />
+          <input
+            value={item.coords?.lng ?? ''}
+            onChange={(event) => onChange({ coords: { lat: item.coords?.lat ?? 0, lng: Number(event.target.value) } })}
+            placeholder="Lng"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+          />
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300"
+          >
+            Remove
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSaving, saveError }, ref) => {
   const [draft, setDraft] = useState<DaySchedule | null>(day);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setDraft({
       ...day,
       items: day.items.map(item => ({ ...item }))
     });
+    const nextExpanded: Record<string, boolean> = {};
+    day.items.forEach((item, index) => {
+      const key = item.id || `index-${index}`;
+      nextExpanded[key] = true;
+    });
+    setExpandedItems(nextExpanded);
   }, [day]);
 
   if (!draft) {
@@ -186,12 +230,6 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-3">
             <input
-              value={draft.date}
-              onChange={(event) => setDraft({ ...draft, date: event.target.value })}
-              placeholder="Date"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-            />
-            <input
               value={draft.title}
               onChange={(event) => setDraft({ ...draft, title: event.target.value })}
               placeholder="Day title"
@@ -212,12 +250,22 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
             key={item.id || index}
             item={item}
             index={index}
+            isExpanded={expandedItems[item.id || `index-${index}`] ?? false}
             onChange={(patch) => updateItem(index, patch)}
             onRemove={() => setDraft(prev => {
               if (!prev) return prev;
+              setExpandedItems((current) => {
+                const copy = { ...current };
+                delete copy[item.id || `index-${index}`];
+                return copy;
+              });
               return { ...prev, items: prev.items.filter((_, idx) => idx !== index) };
             })}
             onMove={moveItem}
+            onToggle={() => {
+              const key = item.id || `index-${index}`;
+              setExpandedItems((current) => ({ ...current, [key]: !current[key] }));
+            }}
           />
         ))}
       </div>
@@ -225,7 +273,11 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
       <div className="mt-4">
         <button
           type="button"
-          onClick={() => setDraft({ ...draft, items: [...draft.items, emptyItem()] })}
+          onClick={() => {
+            const nextItem = emptyItem();
+            setDraft({ ...draft, items: [...draft.items, nextItem] });
+            setExpandedItems((current) => ({ ...current, [`index-${draft.items.length}`]: true }));
+          }}
           className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
         >
           Add Item
