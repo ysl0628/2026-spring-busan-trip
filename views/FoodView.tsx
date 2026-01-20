@@ -13,7 +13,7 @@ const FoodView: React.FC<FoodViewProps> = ({ food }) => (
     {food.map((item) => (
       <div key={item.id} className="bg-white rounded-3xl p-6 flex flex-col gap-4 shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
         <div className="h-40 w-full mb-2">
-          <FoodCategoryIcon category={item.category} />
+          <FoodCategoryIcon category={item.category} imageUrl={item.imageUrl} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start mb-2">

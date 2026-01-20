@@ -1,0 +1,31 @@
+{
+  "name": "釜山228漫遊指南",
+  "short_name": "釜山228",
+  "description": "六天五夜釜山親子旅遊行程應用程式。包含航班資訊、精選景點、在地美食及行前必知。",
+  "lang": "zh-TW",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

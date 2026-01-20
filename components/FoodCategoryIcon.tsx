@@ -2,8 +2,11 @@ import React from 'react';
 import { Coffee, Croissant, Fish, Flame, ShoppingBag, Soup, UtensilsCrossed } from 'lucide-react';
 import { Restaurant } from '../types';
 
-const FoodCategoryIcon: React.FC<{ category: Restaurant['category'] }> = ({ category }) => {
+const FoodCategoryIcon: React.FC<{ category: Restaurant['category'], imageUrl: string }> = ({ category, imageUrl }) => {
   const baseClass = "w-full h-full flex items-center justify-center rounded-xl shadow-inner transition-transform group-hover:scale-110";
+  if (imageUrl) {
+    return <img src={imageUrl} alt={category} className="w-full h-full object-cover rounded-xl" />;
+  }
   switch (category) {
     case 'bbq':
       return <div className={`${baseClass} bg-red-100 text-red-500`}><Flame className="w-8 h-8 md:w-10 md:h-10" /></div>;
