@@ -15,6 +15,7 @@ type DayEditorProps = {
   isSaving: boolean;
   saveError: string;
   onSaveDay: (day: DaySchedule) => void;
+  onDraftChange?: (draft: DaySchedule | null) => void;
 };
 
 export type DayEditorHandle = {
@@ -78,7 +79,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
     <div
       ref={rowRef}
       className={`rounded-2xl border border-slate-100 bg-slate-50/60 p-4 ${
-        isDragOver ? 'border-t-2 border-t-blue-500' : ''
+        isDragOver ? 'border-2 border-blue-500' : ''
       }`}
     >
       <div className="flex items-center gap-3">
@@ -177,7 +178,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, index, isExpanded, onChange, on
   );
 };
 
-const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSaving, saveError }, ref) => {
+const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSaving, saveError, onDraftChange }, ref) => {
   const [draft, setDraft] = useState<DaySchedule | null>(day);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
@@ -193,6 +194,12 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
     });
     setExpandedItems(nextExpanded);
   }, [day]);
+
+  useEffect(() => {
+    if (onDraftChange) {
+      onDraftChange(draft);
+    }
+  }, [draft, onDraftChange]);
 
   if (!draft) {
     return (

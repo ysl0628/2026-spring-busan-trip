@@ -11,6 +11,7 @@ const SHEET_API_URL =
 type SheetRow = {
   id?: string;
   day?: string | number;
+  order?: string | number;
   date?: string;
   time?: string;
   title?: string;
@@ -48,13 +49,14 @@ const postJson = async (payload: Record<string, unknown>) => {
   }
 };
 
-const toSheetRow = (day: DaySchedule, item: ScheduleItem) => {
+const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
   const coords = item.coords;
   const keepText = (value?: string) => value ? `'${value}` : '';
 
   return {
     id: item.id,
     day: day.day,
+    order,
     date: keepText(day.date),
     time: keepText(item.time),
     title: item.title,
@@ -68,6 +70,22 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem) => {
     category: ''
   };
 };
+
+const sameCoords = (a?: ScheduleItem['coords'], b?: ScheduleItem['coords']) => {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.lat === b.lat && a.lng === b.lng;
+};
+
+const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
+  (a.order || 0) === (b.order || 0) &&
+  a.time === b.time &&
+  a.title === b.title &&
+  a.description === b.description &&
+  a.type === b.type &&
+  (a.naverPlaceId || '') === (b.naverPlaceId || '') &&
+  sameCoords(a.coords, b.coords)
+);
 
 export const useSheetData = () => {
   const [itinerary, setItinerary] = useState<DaySchedule[]>([]);
@@ -105,6 +123,7 @@ export const useSheetData = () => {
 
           const item: ScheduleItem = {
             id: row.id,
+            order: toNumber(row.order),
             time: cleanCell(row.time),
             title: cleanCell(row.title),
             description: cleanCell(row.description),
@@ -123,12 +142,18 @@ export const useSheetData = () => {
         const itineraryData = Object.keys(grouped)
           .map(day => Number(day))
           .sort((a, b) => a - b)
-          .map(day => ({
-            day,
-            date: grouped[day].date,
-            title: grouped[day].title,
-            items: grouped[day].items
-          }));
+          .map(day => {
+            const items = grouped[day].items;
+            const hasOrder = items.some(item => item.order !== undefined);
+            return {
+              day,
+              date: grouped[day].date,
+              title: grouped[day].title,
+              items: hasOrder
+                ? [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                : items
+            };
+          });
 
         const spotRows = rows.filter(row => row.type === 'spot' && (row.day === '' || row.day === undefined || row.day === null));
         const spotData: Spot[] = spotRows.map(row => ({
@@ -177,7 +202,7 @@ export const useSheetData = () => {
       const existingIds = new Set((current?.items || []).map(item => item.id).filter(Boolean) as string[]);
       let nextIndex = 1;
 
-      const withIds = day.items.map((item) => {
+      const withIds = day.items.map((item, index) => {
         if (item.id) return item;
         while (existingIds.has(`day${day.day}-item${nextIndex}`)) {
           nextIndex += 1;
@@ -185,23 +210,55 @@ export const useSheetData = () => {
         const id = `day${day.day}-item${nextIndex}`;
         nextIndex += 1;
         existingIds.add(id);
-        return { ...item, id };
+        return { ...item, id, order: index + 1 };
       });
+      const withOrder = withIds.map((item, index) => ({ ...item, order: index + 1 }));
 
-      if (current) {
-        for (const item of current.items) {
-          if (!item.id) continue;
-          await postJson({ action: 'delete', id: item.id });
+
+      const currentItemsById = new Map<string, ScheduleItem>(
+        (current?.items || []).filter(item => item.id).map(item => [item.id as string, item])
+      );
+      const nextItemsById = new Map<string, ScheduleItem>(
+        withOrder.filter(item => item.id).map(item => [item.id as string, item])
+      );
+
+      const currentOrder = (current?.items || []).map(item => item.id).filter(Boolean) as string[];
+      const nextOrder = withOrder.map(item => item.id).filter(Boolean) as string[];
+      const orderChanged = currentOrder.length === nextOrder.length &&
+        currentOrder.some((id, index) => id !== nextOrder[index]);
+
+      if (orderChanged) {
+        for (const id of currentOrder) {
+          await postJson({ action: 'delete', id });
         }
-      }
+        for (const item of withOrder) {
+          await postJson(toSheetRow(day, item, item.order ?? 0));
+        }
+      } else {
+        // Delete removed items only.
+        for (const [id] of currentItemsById) {
+          if (!nextItemsById.has(id)) {
+            await postJson({ action: 'delete', id });
+          }
+        }
 
-      for (const item of withIds) {
-        await postJson(toSheetRow(day, item));
+        // Update changed items (delete + add) and add new ones.
+        for (const item of withOrder) {
+          if (!item.id) continue;
+          const previous = currentItemsById.get(item.id);
+          const dayMetaChanged = current ? (current.date !== day.date || current.title !== day.title) : true;
+          if (!previous || !sameItem(previous, item) || dayMetaChanged) {
+            if (previous) {
+              await postJson({ action: 'delete', id: item.id });
+            }
+            await postJson(toSheetRow(day, item, item.order ?? 0));
+          }
+        }
       }
 
       setItinerary((prev) => {
         const updated = prev.filter(item => item.day !== day.day);
-        updated.push({ ...day, items: withIds });
+          updated.push({ ...day, items: withOrder });
         return updated.sort((a, b) => a.day - b.day);
       });
     } catch (error) {

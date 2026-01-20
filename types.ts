@@ -43,6 +43,7 @@ export interface Restaurant extends LocationCoords {
 
 export interface ScheduleItem {
   id?: string;
+  order?: number;
   time: string;
   title: string;
   description: string;

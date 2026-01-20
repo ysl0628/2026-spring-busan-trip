@@ -25,11 +25,14 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
 }) => {
   const [activeEditorDay, setActiveEditorDay] = useState<DaySchedule | null>(null);
   const editorRef = useRef<DayEditorHandle | null>(null);
+  const [activeDraft, setActiveDraft] = useState<DaySchedule | null>(null);
 
-  const handleSave = () => {
-    const draft = editorRef.current?.getDraft();
+  const handleSave = async () => {
+    const draft = activeDraft || editorRef.current?.getDraft() || activeEditorDay;
     if (draft) {
-      onSaveDay(draft);
+      await onSaveDay(draft);
+      setActiveDraft(null);
+      setActiveEditorDay(null);
     }
   };
 
@@ -38,7 +41,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
       <Dialog open={!!activeEditorDay} onOpenChange={(open) => !open && setActiveEditorDay(null)}>
         <DialogContent className="flex flex-col w-full max-w-3xl h-[92vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
           <DialogHeader className="shrink-0 border-b border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
-            <DialogTitle>Edit Day {activeEditorDay?.day ?? ''} - {activeEditorDay?.date ?? ''}</DialogTitle>
+            <DialogTitle>Edit Day {activeEditorDay?.day ?? ''}</DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto px-6 py-4">
             {activeEditorDay && (
@@ -48,6 +51,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
                 isSaving={isSaving}
                 saveError={saveError}
                 onSaveDay={onSaveDay}
+                onDraftChange={setActiveDraft}
               />
             )}
           </div>
