@@ -1,0 +1,7 @@
+{
+  "name": "釜山228漫遊指南",
+  "description": "專為庭瑜、Yang、淯丞、智棋、宏翔與小藍設計的六天五夜釜山親子旅遊行程應用程式。包含航班資訊、精選景點、在地美食與 AI 旅遊助理。",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
