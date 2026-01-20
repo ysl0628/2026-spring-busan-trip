@@ -97,15 +97,17 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
           </div>
           {expandedDay === day.day && (
             <div className="relative p-6 animate-slideDown bg-slate-50/50">
-              <button
-                type="button"
-                onClick={() => setActiveEditorDay(day)}
-                aria-label="Edit day"
-                className="absolute right-6 top-6 rounded-full bg-slate-900/5 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-900/10 sm:px-3"
-              >
-                <span className="hidden sm:inline">Edit</span>
-                <Pencil className="w-4 h-4 sm:hidden" />
-              </button>
+              <div className="absolute right-6 top-6 lg:static lg:mb-4 lg:flex lg:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setActiveEditorDay(day)}
+                  aria-label="Edit day"
+                  className="rounded-full bg-slate-900/5 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-900/10 sm:px-3"
+                >
+                  <span className="hidden sm:inline">Edit</span>
+                  <Pencil className="w-4 h-4 sm:hidden" />
+                </button>
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   {day.items.map((item, idx) => (
