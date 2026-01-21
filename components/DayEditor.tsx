@@ -184,6 +184,15 @@ const ItemRow: React.FC<ItemRowProps> = ({
             placeholder="Naver place id"
             className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
           />
+          <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={item.showOnMap !== false}
+              onChange={(event) => onChange({ showOnMap: event.target.checked })}
+              className="rounded border-slate-300"
+            />
+            <span className="text-xs">顯示在地圖</span>
+          </label>
           <button
             type="button"
             onClick={onRemove}

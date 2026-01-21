@@ -52,6 +52,7 @@ export interface ScheduleItem {
   location?: string;
   coords?: LocationCoords;
   naverPlaceId?: string;
+  showOnMap?: boolean;
 }
 
 export interface DaySchedule {

@@ -24,6 +24,7 @@ type SheetRow = {
   imageUrl?: string;
   category?: string;
   dayTitle?: string;
+  showOnMap?: string | boolean;
 };
 
 const cleanCell = (value?: string) => {
@@ -50,6 +51,13 @@ const toNumber = (value?: string | number) => {
   if (value === null || value === undefined || value === '') return undefined;
   const num = Number(value);
   return Number.isFinite(num) ? num : undefined;
+};
+
+const toBoolean = (value?: string | boolean) => {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'boolean') return value;
+  const lower = String(value).toLowerCase().trim();
+  return lower === 'true' || lower === '1' || lower === 'yes';
 };
 
 const postJson = async (payload: Record<string, unknown>) => {
@@ -84,7 +92,8 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
     lng: coords ? coords.lng : '',
     tags: '',
     imageUrl: '',
-    category: ''
+    category: '',
+    showOnMap: item.showOnMap ?? ''
   };
 };
 
@@ -101,7 +110,8 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   a.description === b.description &&
   a.type === b.type &&
   (a.naverPlaceId || '') === (b.naverPlaceId || '') &&
-  sameCoords(a.coords, b.coords)
+  sameCoords(a.coords, b.coords) &&
+  (a.showOnMap ?? true) === (b.showOnMap ?? true)
 );
 
 export const useSheetData = () => {
@@ -128,7 +138,7 @@ export const useSheetData = () => {
           return acc;
         }, {});
 
-        const scheduleItems = rows.filter(row => row.day !== '' && row.day !== undefined && row.day !== null);
+        const scheduleItems = rows.filter(row => row.day !== '' && row.day !== undefined && row.day !== null);        
         const grouped: Record<number, { date: string; title: string; items: ScheduleItem[] }> = {};
 
         scheduleItems.forEach(row => {
@@ -146,7 +156,8 @@ export const useSheetData = () => {
             description: cleanCell(row.description),
             type: (row.type as ScheduleItem['type']) || 'other',
             naverPlaceId: row.naverPlaceId || undefined,
-            coords
+            coords,
+            showOnMap: toBoolean(row.showOnMap as string | boolean | undefined)
           };
 
           if (!grouped[dayNum]) {

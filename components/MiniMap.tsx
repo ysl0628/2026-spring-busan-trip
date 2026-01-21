@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ScheduleItem } from '../types';
 
 const MiniMap: React.FC<{ items: ScheduleItem[]; day: number }> = ({ items, day }) => {
-  const placeNames = useMemo(
-    () => items.map(i => i.title).filter(Boolean),
-    [items]
-  );
+  const placeNames = items
+    .filter(i => i.showOnMap !== false)
+    .map(i => i.title)
+    .filter(Boolean);
 
-  if (placeNames.length === 0) {
+    if (placeNames.length === 0) {
     return (
       <div className="w-full h-64 md:h-80 lg:h-96 mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/70 flex items-center justify-center text-sm text-slate-400">
         No map locations yet.
