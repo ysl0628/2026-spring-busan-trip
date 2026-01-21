@@ -5,7 +5,9 @@ import {
   Plane, 
   MapPin, 
   Utensils, 
-  Info
+  Info,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { TabType } from './types';
 import { FLIGHTS, MEMBERS } from './constants';
@@ -22,7 +24,7 @@ import { useSheetData } from './hooks/useSheetData';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.ITINERARY);
   const [expandedDay, setExpandedDay] = useState<number>(1);
-  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay } = useSheetData();
+  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay, isOfflineMode, toggleOfflineMode } = useSheetData();
 
   const renderContent = () => {
     if (isLoading) {
@@ -50,6 +52,7 @@ const App: React.FC = () => {
             onSaveDay={saveDay}
             isSaving={isSaving}
             saveError={saveError}
+            isOfflineMode={isOfflineMode}
           />
         );
       case TabType.FLIGHT:
@@ -78,8 +81,34 @@ const App: React.FC = () => {
           <SidebarItem icon={<Utensils />} label="釜山美食" isActive={activeTab === TabType.FOOD} onClick={() => setActiveTab(TabType.FOOD)} />
           <SidebarItem icon={<Info />} label="行前必知" isActive={activeTab === TabType.INFO} onClick={() => setActiveTab(TabType.INFO)} />
         </nav>
-        <div className="p-6 border-t border-slate-100 hidden lg:block">
-           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Family Busan 2026</p>
+        <div className="p-6 border-t border-slate-100 hidden lg:block space-y-4">
+          <label className="flex items-center justify-between gap-3 cursor-pointer group">
+            <div className="flex items-center gap-2">
+              {isOfflineMode ? (
+                <WifiOff className="w-4 h-4 text-slate-400" />
+              ) : (
+                <Wifi className="w-4 h-4 text-slate-400" />
+              )}
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                {isOfflineMode ? '離線模式' : '線上模式'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={toggleOfflineMode}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isOfflineMode ? 'bg-blue-600' : 'bg-slate-300'
+              }`}
+              aria-label="Toggle offline mode"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isOfflineMode ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </label>
+          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Family Busan 2026</p>
         </div>
       </aside>
 
@@ -98,11 +127,34 @@ const App: React.FC = () => {
                 {activeTab === TabType.FOOD && '釜山美食'}
                 {activeTab === TabType.INFO && '行前必知'}
               </h2>
-              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="md:hidden flex items-center gap-2 cursor-pointer">
+                {isOfflineMode ? (
+                  <WifiOff className="w-5 h-5 text-slate-400" />
+                ) : (
+                  <Wifi className="w-5 h-5 text-slate-400" />
+                )}
+                <button
+                  type="button"
+                  onClick={toggleOfflineMode}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isOfflineMode ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                  aria-label="Toggle offline mode"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isOfflineMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </label>
               <p className="text-slate-400 font-bold mt-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> 2025.02.26 - 03.03
+                <Calendar className="w-4 h-4" /> 2026.02.26 - 03.03
               </p>
             </div>
+          </div>
         </header>
         
         <main className="flex-1 min-h-0 px-6 md:px-12 max-w-7xl mx-auto w-full overflow-y-auto">

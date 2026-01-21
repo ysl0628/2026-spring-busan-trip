@@ -1,12 +1,39 @@
 import { useEffect, useState } from 'react';
 import { DaySchedule, Restaurant, ScheduleItem, Spot } from '../types';
-import { ITINERARY } from '../constants';
+import { ITINERARY, SPOTS, FOOD } from '../constants';
 
 const SHEET_API_URL =
   import.meta.env.VITE_SHEET_API_URL ||
   (import.meta.env.DEV
     ? '/sheet'
     : 'https://script.google.com/macros/s/AKfycbwwX0F7AqRreLHoCt1qkdI5xyH3wbVow87AQ361M63n0PB_DDhuEiJORtYENhmsVGFk/exec');
+
+// 離線模式：檢查環境變數或 localStorage
+const getOfflineMode = (): boolean => {
+  if (import.meta.env.VITE_OFFLINE_MODE === 'true') return true;
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('trip_offline_mode');
+    return stored === 'true';
+  }
+  return false;
+};
+
+const setOfflineMode = (enabled: boolean): void => {
+  if (typeof window !== 'undefined') {
+    if (enabled) {
+      localStorage.setItem('trip_offline_mode', 'true');
+    } else {
+      localStorage.removeItem('trip_offline_mode');
+    }
+  }
+};
+
+// localStorage keys
+const STORAGE_KEYS = {
+  ITINERARY: 'trip_itinerary',
+  SPOTS: 'trip_spots',
+  FOOD: 'trip_food'
+};
 
 type SheetRow = {
   id?: string;
@@ -114,6 +141,31 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   (a.showOnMap ?? true) === (b.showOnMap ?? true)
 );
 
+// 離線模式：localStorage 輔助函數
+const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      return JSON.parse(stored) as T;
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to load ${key} from localStorage:`, error);
+  }
+  return defaultValue;
+};
+
+const saveToStorage = <T>(key: string, data: T): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to save ${key} to localStorage:`, error);
+  }
+};
+
 export const useSheetData = () => {
   const [itinerary, setItinerary] = useState<DaySchedule[]>([]);
   const [spots, setSpots] = useState<Spot[]>([]);
@@ -122,10 +174,35 @@ export const useSheetData = () => {
   const [loadError, setLoadError] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string>('');
+  const [isOfflineMode, setIsOfflineModeState] = useState<boolean>(getOfflineMode());
+
+  const toggleOfflineMode = () => {
+    const newMode = !isOfflineMode;
+    setOfflineMode(newMode);
+    setIsOfflineModeState(newMode);
+    // 重新載入資料
+    setIsLoading(true);
+    window.location.reload();
+  };
 
   useEffect(() => {
     const loadSheet = async () => {
       try {
+        // 離線模式：從 localStorage 載入
+        if (isOfflineMode) {
+          const storedItinerary = loadFromStorage<DaySchedule[]>(STORAGE_KEYS.ITINERARY, ITINERARY);
+          const storedSpots = loadFromStorage<Spot[]>(STORAGE_KEYS.SPOTS, SPOTS);
+          const storedFood = loadFromStorage<Restaurant[]>(STORAGE_KEYS.FOOD, FOOD);
+          
+          setItinerary(storedItinerary);
+          setSpots(storedSpots);
+          setFood(storedFood);
+          setLoadError('');
+          setIsLoading(false);
+          return;
+        }
+
+        // 線上模式：從 Google Sheets API 載入
         const response = await fetch(SHEET_API_URL);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
@@ -220,7 +297,7 @@ export const useSheetData = () => {
     };
 
     loadSheet();
-  }, []);
+  }, [isOfflineMode]);
 
   const saveDay = async (day: DaySchedule) => {
     setIsSaving(true);
@@ -242,7 +319,18 @@ export const useSheetData = () => {
       });
       const withOrder = withIds.map((item, index) => ({ ...item, order: index + 1 }));
 
+      // 離線模式：儲存到 localStorage
+      if (isOfflineMode) {
+        const updated = itinerary.filter(item => item.day !== day.day);
+        updated.push({ ...day, items: withOrder });
+        const sorted = updated.sort((a, b) => a.day - b.day);
+        setItinerary(sorted);
+        saveToStorage(STORAGE_KEYS.ITINERARY, sorted);
+        setIsSaving(false);
+        return;
+      }
 
+      // 線上模式：儲存到 Google Sheets
       const currentItemsById = new Map<string, ScheduleItem>(
         (current?.items || []).filter(item => item.id).map(item => [item.id as string, item])
       );
@@ -296,6 +384,17 @@ export const useSheetData = () => {
     setSaveError('');
     try {
       const current = itinerary.find(item => item.day === dayNumber);
+      
+      // 離線模式：從 localStorage 刪除
+      if (isOfflineMode) {
+        const updated = itinerary.filter(item => item.day !== dayNumber);
+        setItinerary(updated);
+        saveToStorage(STORAGE_KEYS.ITINERARY, updated);
+        setIsSaving(false);
+        return;
+      }
+
+      // 線上模式：從 Google Sheets 刪除
       if (current) {
         for (const item of current.items) {
           if (!item.id) continue;
@@ -310,5 +409,17 @@ export const useSheetData = () => {
     }
   };
 
-  return { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay, deleteDay };
+  return { 
+    itinerary, 
+    spots, 
+    food, 
+    isLoading, 
+    loadError, 
+    isSaving, 
+    saveError, 
+    saveDay, 
+    deleteDay,
+    isOfflineMode,
+    toggleOfflineMode
+  };
 };

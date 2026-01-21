@@ -143,63 +143,67 @@ const ItemRow: React.FC<ItemRowProps> = ({
       </div>
 
       {isExpanded && (
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-7">
-          <input
-            value={item.time}
-            onChange={(event) => onChange({ time: event.target.value })}
-            placeholder="Time"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-          />
-          <input
-            value={item.title}
-            onChange={(event) => onChange({ title: event.target.value })}
-            placeholder="Title"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
-          />
-          <input
-            value={item.description}
-            onChange={(event) => onChange({ description: event.target.value })}
-            placeholder="Description"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
-          />
-          <Select
-            value={item.type}
-            onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="類型" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="flight">航班</SelectItem>
-              <SelectItem value="spot">景點</SelectItem>
-              <SelectItem value="food">美食</SelectItem>
-              <SelectItem value="transport">交通</SelectItem>
-              <SelectItem value="hotel">住宿</SelectItem>
-              <SelectItem value="other">其他</SelectItem>
-            </SelectContent>
-          </Select>
-          <input
-            value={item.naverPlaceId || ''}
-            onChange={(event) => onChange({ naverPlaceId: event.target.value })}
-            placeholder="Naver place id"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
-          />
-          <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer">
+        <div className="mt-4 space-y-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
             <input
-              type="checkbox"
-              checked={item.showOnMap !== false}
-              onChange={(event) => onChange({ showOnMap: event.target.checked })}
-              className="rounded border-slate-300"
+              value={item.time}
+              onChange={(event) => onChange({ time: event.target.value })}
+              placeholder="Time"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
             />
-            <span className="text-xs">顯示在地圖</span>
-          </label>
-          <button
-            type="button"
-            onClick={onRemove}
-            className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300"
-          >
-            Remove
-          </button>
+            <input
+              value={item.title}
+              onChange={(event) => onChange({ title: event.target.value })}
+              placeholder="Title"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
+            />
+            <input
+              value={item.description}
+              onChange={(event) => onChange({ description: event.target.value })}
+              placeholder="Description"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
+            />
+            <Select
+              value={item.type}
+              onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="類型" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="flight">航班</SelectItem>
+                <SelectItem value="spot">景點</SelectItem>
+                <SelectItem value="food">美食</SelectItem>
+                <SelectItem value="transport">交通</SelectItem>
+                <SelectItem value="hotel">住宿</SelectItem>
+                <SelectItem value="other">其他</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
+            <input
+              value={item.naverPlaceId || ''}
+              onChange={(event) => onChange({ naverPlaceId: event.target.value })}
+              placeholder="Naver place id"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
+            />
+            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer md:col-span-3">
+              <input
+                type="checkbox"
+                checked={item.showOnMap !== false}
+                onChange={(event) => onChange({ showOnMap: event.target.checked })}
+                className="rounded border-slate-300"
+              />
+              <span className="text-xs">顯示在地圖</span>
+            </label>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300 md:col-span-1"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       )}
     </div>
