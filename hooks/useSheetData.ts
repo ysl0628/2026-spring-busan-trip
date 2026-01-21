@@ -141,6 +141,86 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   (a.showOnMap ?? true) === (b.showOnMap ?? true)
 );
 
+// 將 Google Sheets rows 轉換成應用程式資料格式
+const parseSheetRows = (rows: SheetRow[]) => {
+  const dayTitleMap = ITINERARY.reduce<Record<number, string>>((acc, day) => {
+    acc[day.day] = day.title;
+    return acc;
+  }, {});
+
+  const scheduleItems = rows.filter(row => row.day !== '' && row.day !== undefined && row.day !== null);
+  const grouped: Record<number, { date: string; title: string; items: ScheduleItem[] }> = {};
+
+  scheduleItems.forEach(row => {
+    const dayNum = Number(row.day);
+    if (!Number.isFinite(dayNum)) return;
+    const date = cleanCell(row.date);
+    const title = cleanCell(row.dayTitle) || dayTitleMap[dayNum] || '';
+    const coords = (row.lat || row.lng) ? { lat: toNumber(row.lat) ?? 0, lng: toNumber(row.lng) ?? 0 } : undefined;
+
+    const item: ScheduleItem = {
+      id: row.id,
+      order: toNumber(row.order),
+      time: normalizeTime(row.time),
+      title: cleanCell(row.title),
+      description: cleanCell(row.description),
+      type: (row.type as ScheduleItem['type']) || 'other',
+      naverPlaceId: row.naverPlaceId || undefined,
+      coords,
+      showOnMap: toBoolean(row.showOnMap as string | boolean | undefined)
+    };
+
+    if (!grouped[dayNum]) {
+      grouped[dayNum] = { date, title, items: [] };
+    }
+
+    grouped[dayNum].items.push(item);
+  });
+
+  const itineraryData = Object.keys(grouped)
+    .map(day => Number(day))
+    .sort((a, b) => a - b)
+    .map(day => {
+      const items = grouped[day].items;
+      const hasOrder = items.some(item => item.order !== undefined);
+      return {
+        day,
+        date: grouped[day].date,
+        title: grouped[day].title,
+        items: hasOrder
+          ? [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          : items
+      };
+    });
+
+  const spotRows = rows.filter(row => row.type === 'spot' && (row.day === '' || row.day === undefined || row.day === null));
+  const spotData: Spot[] = spotRows.map(row => ({
+    id: row.id || '',
+    name: cleanCell(row.title),
+    description: cleanCell(row.description),
+    category: cleanCell(row.category),
+    imageUrl: row.imageUrl || '',
+    tags: row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+    lat: toNumber(row.lat) ?? 0,
+    lng: toNumber(row.lng) ?? 0,
+    naverPlaceId: row.naverPlaceId || undefined
+  }));
+
+  const foodRows = rows.filter(row => row.type === 'food' && (row.day === '' || row.day === undefined || row.day === null));
+  const foodData: Restaurant[] = foodRows.map(row => ({
+    id: row.id || '',
+    name: cleanCell(row.title),
+    description: cleanCell(row.description),
+    category: (row.category as Restaurant['category']) || 'other',
+    imageUrl: row.imageUrl || '',
+    lat: toNumber(row.lat) ?? 0,
+    lng: toNumber(row.lng) ?? 0,
+    naverPlaceId: row.naverPlaceId || undefined
+  }));
+
+  return { itineraryData, spotData, foodData };
+};
+
 // 離線模式：localStorage 輔助函數
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
@@ -210,80 +290,7 @@ export const useSheetData = () => {
         const payload = await response.json();
         const rows = Array.isArray(payload?.data) ? payload.data as SheetRow[] : [];
 
-        const dayTitleMap = ITINERARY.reduce<Record<number, string>>((acc, day) => {
-          acc[day.day] = day.title;
-          return acc;
-        }, {});
-
-        const scheduleItems = rows.filter(row => row.day !== '' && row.day !== undefined && row.day !== null);        
-        const grouped: Record<number, { date: string; title: string; items: ScheduleItem[] }> = {};
-
-        scheduleItems.forEach(row => {
-          const dayNum = Number(row.day);
-          if (!Number.isFinite(dayNum)) return;
-          const date = cleanCell(row.date);
-          const title = cleanCell(row.dayTitle) || dayTitleMap[dayNum] || '';
-          const coords = (row.lat || row.lng) ? { lat: toNumber(row.lat) ?? 0, lng: toNumber(row.lng) ?? 0 } : undefined;
-
-          const item: ScheduleItem = {
-            id: row.id,
-            order: toNumber(row.order),
-            time: normalizeTime(row.time),
-            title: cleanCell(row.title),
-            description: cleanCell(row.description),
-            type: (row.type as ScheduleItem['type']) || 'other',
-            naverPlaceId: row.naverPlaceId || undefined,
-            coords,
-            showOnMap: toBoolean(row.showOnMap as string | boolean | undefined)
-          };
-
-          if (!grouped[dayNum]) {
-            grouped[dayNum] = { date, title, items: [] };
-          }
-
-          grouped[dayNum].items.push(item);
-        });
-
-        const itineraryData = Object.keys(grouped)
-          .map(day => Number(day))
-          .sort((a, b) => a - b)
-          .map(day => {
-            const items = grouped[day].items;
-            const hasOrder = items.some(item => item.order !== undefined);
-            return {
-              day,
-              date: grouped[day].date,
-              title: grouped[day].title,
-              items: hasOrder
-                ? [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                : items
-            };
-          });
-
-        const spotRows = rows.filter(row => row.type === 'spot' && (row.day === '' || row.day === undefined || row.day === null));
-        const spotData: Spot[] = spotRows.map(row => ({
-          id: row.id || '',
-          name: cleanCell(row.title),
-          description: cleanCell(row.description),
-          category: cleanCell(row.category),
-          imageUrl: row.imageUrl || '',
-          tags: row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
-          lat: toNumber(row.lat) ?? 0,
-          lng: toNumber(row.lng) ?? 0,
-          naverPlaceId: row.naverPlaceId || undefined
-        }));
-
-        const foodRows = rows.filter(row => row.type === 'food' && (row.day === '' || row.day === undefined || row.day === null));
-        const foodData: Restaurant[] = foodRows.map(row => ({
-          id: row.id || '',
-          name: cleanCell(row.title),
-          description: cleanCell(row.description),
-          category: (row.category as Restaurant['category']) || 'other',
-          imageUrl: row.imageUrl || '',
-          lat: toNumber(row.lat) ?? 0,
-          lng: toNumber(row.lng) ?? 0,
-          naverPlaceId: row.naverPlaceId || undefined
-        }));
+        const { itineraryData, spotData, foodData } = parseSheetRows(rows);
 
         setItinerary(itineraryData);
         setSpots(spotData);
@@ -409,6 +416,44 @@ export const useSheetData = () => {
     }
   };
 
+  const syncFromSheets = async () => {
+    if (!isOfflineMode) {
+      setSaveError('Not in offline mode.');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      // 從 Google Sheets 讀取最新資料
+      const response = await fetch(SHEET_API_URL);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const payload = await response.json();
+      const rows = Array.isArray(payload?.data) ? payload.data as SheetRow[] : [];
+
+      const { itineraryData, spotData, foodData } = parseSheetRows(rows);
+
+      // 儲存到 localStorage
+      saveToStorage(STORAGE_KEYS.ITINERARY, itineraryData);
+      saveToStorage(STORAGE_KEYS.SPOTS, spotData);
+      saveToStorage(STORAGE_KEYS.FOOD, foodData);
+
+      // 更新 state
+      setItinerary(itineraryData);
+      setSpots(spotData);
+      setFood(foodData);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to sync from sheets.';
+      setSaveError(message);
+      // eslint-disable-next-line no-console
+      console.error('Sync from sheets failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return { 
     itinerary, 
     spots, 
@@ -420,6 +465,7 @@ export const useSheetData = () => {
     saveDay, 
     deleteDay,
     isOfflineMode,
-    toggleOfflineMode
+    toggleOfflineMode,
+    syncFromSheets
   };
 };

@@ -24,7 +24,7 @@ import { useSheetData } from './hooks/useSheetData';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.ITINERARY);
   const [expandedDay, setExpandedDay] = useState<number>(1);
-  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay, isOfflineMode, toggleOfflineMode } = useSheetData();
+  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay, isOfflineMode, toggleOfflineMode, syncFromSheets } = useSheetData();
 
   const renderContent = () => {
     if (isLoading) {
@@ -108,6 +108,16 @@ const App: React.FC = () => {
               />
             </button>
           </label>
+          {isOfflineMode && (
+            <button
+              type="button"
+              onClick={syncFromSheets}
+              disabled={isSaving}
+              className="w-full rounded-xl bg-green-600 px-3 py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-60 transition-colors"
+            >
+              {isSaving ? '同步中...' : '從 Google Sheets 同步'}
+            </button>
+          )}
           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Family Busan 2026</p>
         </div>
       </aside>
@@ -129,6 +139,16 @@ const App: React.FC = () => {
               </h2>
             </div>
             <div className="flex items-center gap-4">
+              {isOfflineMode && (
+                <button
+                  type="button"
+                  onClick={syncFromSheets}
+                  disabled={isSaving}
+                  className="md:hidden rounded-xl bg-green-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-60 transition-colors"
+                >
+                  {isSaving ? '同步中...' : '同步'}
+                </button>
+              )}
               <label className="md:hidden flex items-center gap-2 cursor-pointer">
                 {isOfflineMode ? (
                   <WifiOff className="w-5 h-5 text-slate-400" />
@@ -150,7 +170,7 @@ const App: React.FC = () => {
                   />
                 </button>
               </label>
-              <p className="text-slate-400 font-bold mt-2 flex items-center gap-2">
+              <p className="hidden md:flex text-slate-400 font-bold mt-2 items-center gap-2">
                 <Calendar className="w-4 h-4" /> 2026.02.26 - 03.03
               </p>
             </div>
