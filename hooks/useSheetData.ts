@@ -90,7 +90,7 @@ const toBoolean = (value?: string | boolean) => {
 const postJson = async (payload: Record<string, unknown>) => {
   const response = await fetch(SHEET_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
   });
   if (!response.ok) {
