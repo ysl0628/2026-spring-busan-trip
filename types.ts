@@ -53,6 +53,7 @@ export interface ScheduleItem {
   coords?: LocationCoords;
   naverPlaceId?: string;
   showOnMap?: boolean;
+  useBusanPass?: boolean;
 }
 
 export interface DaySchedule {

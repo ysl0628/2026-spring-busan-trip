@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+﻿import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
@@ -26,7 +26,8 @@ const emptyItem = (): ScheduleItem => ({
   time: '',
   title: '',
   description: '',
-  type: 'other'
+  type: 'other',
+  useBusanPass: false
 });
 
 type ItemRowProps = {
@@ -180,7 +181,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-9">
             <input
               value={item.naverPlaceId || ''}
               onChange={(event) => onChange({ naverPlaceId: event.target.value })}
@@ -196,12 +197,21 @@ const ItemRow: React.FC<ItemRowProps> = ({
               />
               <span className="text-xs">顯示在地圖</span>
             </label>
+            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer md:col-span-2">
+              <input
+                type="checkbox"
+                checked={item.useBusanPass === true}
+                onChange={(event) => onChange({ useBusanPass: event.target.checked })}
+                className="rounded border-slate-300"
+              />
+              <span className="text-xs">使用釜山PASS</span>
+            </label>
             <button
               type="button"
               onClick={onRemove}
               className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300 md:col-span-1"
             >
-              Remove
+              移除
             </button>
           </div>
         </div>
@@ -324,3 +334,4 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
 DayEditor.displayName = 'DayEditor';
 
 export default DayEditor;
+

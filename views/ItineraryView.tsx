@@ -138,7 +138,14 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
                             </a>
                           )}
                         </div>
-                        <h4 className="font-bold text-slate-800 text-lg leading-tight">{item.title}</h4>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="font-bold text-slate-800 text-lg leading-tight">{item.title}</h4>
+                          {item.useBusanPass && (
+                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
+                              Busan Pass
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-slate-500 mt-1 leading-relaxed">{item.description}</p>
                       </div>
                     </div>

@@ -66,7 +66,7 @@ export const ITINERARY: DaySchedule[] = [
   {
     day: 3,
     date: '2/28 (六)',
-    title: '海港風情與文化',
+    title: '海雲台全攻略',
     items: [
       { id: 'day3-item1', order: 1, time: '10:00', title: '松島海上纜車', description: '跨海纜車體驗 (使用釜山PASS)', type: 'spot', coords: { lat: 35.076, lng: 129.023 }, naverPlaceId: '1962824676', showOnMap: true },
       { id: 'day3-item2', order: 2, time: '11:30', title: '松島龍宮天空步道', description: '漫步海面之上', type: 'spot', naverPlaceId: '1202664243', showOnMap: true },
@@ -79,7 +79,7 @@ export const ITINERARY: DaySchedule[] = [
   {
     day: 4,
     date: '3/1 (日)',
-    title: '文化村與購物',
+    title: '松島+甘川+札嘎其',
     items: [
       { id: 'day4-item1', order: 1, time: '10:30', title: '白淺灘文化村', description: '影島絕美海岸村落', type: 'spot', coords: { lat: 35.078, lng: 129.044 }, naverPlaceId: '37418047', showOnMap: true },
       { id: 'day4-item2', order: 2, time: '12:30', title: '午餐：南浦洞區域', description: '國際市場、富平罐頭市場小吃', type: 'food', showOnMap: false },
@@ -91,7 +91,7 @@ export const ITINERARY: DaySchedule[] = [
   {
     day: 5,
     date: '3/2 (一)',
-    title: '海雲台全攻略',
+    title: '影島+膠囊列車',
     items: [
       { id: 'day5-item1', order: 1, time: '10:00', title: '海雲台藍線公園', description: '海岸列車之旅', type: 'spot', coords: { lat: 35.160, lng: 129.167 }, naverPlaceId: '1287134328', showOnMap: true },
       { id: 'day5-item2', order: 2, time: '12:00', title: '午餐：31cm海鮮刀削麵', description: '滿滿貝類海鮮麵', type: 'spot', naverPlaceId: '1812508466', showOnMap: true },

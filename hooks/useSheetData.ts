@@ -52,6 +52,7 @@ type SheetRow = {
   category?: string;
   dayTitle?: string;
   showOnMap?: string | boolean;
+  useBusanPass?: string | boolean;
 };
 
 const cleanCell = (value?: string) => {
@@ -120,7 +121,8 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
     tags: '',
     imageUrl: '',
     category: '',
-    showOnMap: item.showOnMap ?? ''
+    showOnMap: item.showOnMap ?? '',
+    useBusanPass: item.useBusanPass ?? ''
   };
 };
 
@@ -138,7 +140,8 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   a.type === b.type &&
   (a.naverPlaceId || '') === (b.naverPlaceId || '') &&
   sameCoords(a.coords, b.coords) &&
-  (a.showOnMap ?? true) === (b.showOnMap ?? true)
+  (a.showOnMap ?? true) === (b.showOnMap ?? true) &&
+  (a.useBusanPass ?? false) === (b.useBusanPass ?? false)
 );
 
 // 將 Google Sheets rows 轉換成應用程式資料格式
@@ -167,7 +170,8 @@ const parseSheetRows = (rows: SheetRow[]) => {
       type: (row.type as ScheduleItem['type']) || 'other',
       naverPlaceId: row.naverPlaceId || undefined,
       coords,
-      showOnMap: toBoolean(row.showOnMap as string | boolean | undefined)
+      showOnMap: toBoolean(row.showOnMap as string | boolean | undefined),
+      useBusanPass: toBoolean(row.useBusanPass as string | boolean | undefined)
     };
 
     if (!grouped[dayNum]) {
