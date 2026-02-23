@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
@@ -144,72 +144,90 @@ const ItemRow: React.FC<ItemRowProps> = ({
       </div>
 
       {isExpanded && (
-        <div className="mt-4 space-y-3">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
-            <input
-              value={item.time}
-              onChange={(event) => onChange({ time: event.target.value })}
-              placeholder="Time"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
-            />
-            <input
-              value={item.title}
-              onChange={(event) => onChange({ title: event.target.value })}
-              placeholder="Title"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-2"
-            />
-            <input
-              value={item.description}
-              onChange={(event) => onChange({ description: event.target.value })}
-              placeholder="Description"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
-            />
-            <Select
-              value={item.type}
-              onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="類型" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="flight">航班</SelectItem>
-                <SelectItem value="spot">景點</SelectItem>
-                <SelectItem value="food">美食</SelectItem>
-                <SelectItem value="transport">交通</SelectItem>
-                <SelectItem value="hotel">住宿</SelectItem>
-                <SelectItem value="other">其他</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="mt-4 space-y-4">
+          {/* 基本資訊 */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">時間</label>
+                <input
+                  type="time"
+                  value={item.time}
+                  onChange={(event) => onChange({ time: event.target.value })}
+                  className="w-full min-w-[130px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">類型</label>
+                <Select
+                  value={item.type}
+                  onValueChange={(value) => onChange({ type: value as ScheduleItem['type'] })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="類型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="flight">航班</SelectItem>
+                    <SelectItem value="spot">景點</SelectItem>
+                    <SelectItem value="food">美食</SelectItem>
+                    <SelectItem value="transport">交通</SelectItem>
+                    <SelectItem value="hotel">住宿</SelectItem>
+                    <SelectItem value="other">其他</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-slate-500 mb-1">標題</label>
+                <input
+                  value={item.title}
+                  onChange={(event) => onChange({ title: event.target.value })}
+                  placeholder="行程名稱"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">備註</label>
+              <textarea
+                value={item.description}
+                onChange={(event) => onChange({ description: event.target.value })}
+                placeholder="詳細說明..."
+                rows={2}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 resize-none"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-9">
+
+          {/* 地點與選項 */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
             <input
               value={item.naverPlaceId || ''}
               onChange={(event) => onChange({ naverPlaceId: event.target.value })}
-              placeholder="Naver place id"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 md:col-span-3"
+              placeholder="Naver Place ID"
+              className="flex-1 min-w-[140px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
             />
-            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer md:col-span-3">
+            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer whitespace-nowrap">
               <input
                 type="checkbox"
                 checked={item.showOnMap !== false}
                 onChange={(event) => onChange({ showOnMap: event.target.checked })}
                 className="rounded border-slate-300"
               />
-              <span className="text-xs">顯示在地圖</span>
+              <span className="text-xs">地圖顯示</span>
             </label>
-            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer md:col-span-2">
+            <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer whitespace-nowrap">
               <input
                 type="checkbox"
                 checked={item.useBusanPass === true}
                 onChange={(event) => onChange({ useBusanPass: event.target.checked })}
                 className="rounded border-slate-300"
               />
-              <span className="text-xs">使用釜山PASS</span>
+              <span className="text-xs">釜山PASS</span>
             </label>
             <button
               type="button"
               onClick={onRemove}
-              className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300 md:col-span-1"
+              className="rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:text-red-700 hover:border-red-300"
             >
               移除
             </button>

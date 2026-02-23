@@ -41,6 +41,15 @@ export interface Restaurant extends LocationCoords {
   naverPlaceId?: string;
 }
 
+export type TransportMethod = 'walk' | 'subway' | 'bus' | 'taxi' | 'train' | 'cable' | 'other';
+
+export interface TransportInfo {
+  method: TransportMethod;
+  duration: number; // 分鐘
+  description?: string; // 例如 "1號線往海雲台方向"
+  cost?: number; // 韓元
+}
+
 export interface ScheduleItem {
   id?: string;
   order?: number;
@@ -54,6 +63,7 @@ export interface ScheduleItem {
   naverPlaceId?: string;
   showOnMap?: boolean;
   useBusanPass?: boolean;
+  transportToNext?: TransportInfo; // 到下一個點的交通方式
 }
 
 export interface DaySchedule {

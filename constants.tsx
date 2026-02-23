@@ -44,9 +44,9 @@ export const ITINERARY: DaySchedule[] = [
     title: '抵達與入住',
     items: [
       { id: 'day1-item1', order: 1, time: '17:40', title: '搭機前往釜山', description: 'BX792 桃園 T2 啟程', type: 'flight', showOnMap: false },
-      { id: 'day1-item2', order: 2, time: '21:00', title: '抵達金海機場', description: '辦理入境、領取行李 (約 1 小時)', type: 'transport', showOnMap: true },
+      { id: 'day1-item2', order: 2, time: '21:00', title: '抵達金海機場', description: '辦理入境、領取行李 (約 1 小時)', type: 'transport', showOnMap: true, transportToNext: { method: 'taxi', duration: 40, cost: 35000, description: 'Uber 直達廣安里' } },
       { id: 'day1-item3', order: 3, time: '22:00', title: '前往廣安里', description: '搭乘 Uber/Taxi 直達住宿點 (約 30-40 分鐘)', type: 'transport', showOnMap: true },
-      { id: 'day1-item4', order: 4, time: '22:45', title: 'Check-in Coco House', description: '廣安里海景住宿', type: 'hotel', coords: { lat: 35.153, lng: 129.118 }, showOnMap: false },
+      { id: 'day1-item4', order: 4, time: '22:45', title: 'Check-in Coco House', description: '廣安里海景住宿', type: 'hotel', coords: { lat: 35.153, lng: 129.118 }, showOnMap: false, transportToNext: { method: 'walk', duration: 5, description: '步行至附近餐廳' } },
       { id: 'day1-item5', order: 5, time: '23:15', title: '深夜晚餐/宵夜', description: '推薦：83海池或附近烤肉、豬肉湯飯', type: 'food', showOnMap: false }
     ]
   },
@@ -55,11 +55,11 @@ export const ITINERARY: DaySchedule[] = [
     date: '2/27 (五)',
     title: '東釜山歡樂行',
     items: [
-      { id: 'day2-item1', order: 1, time: '09:30', title: '出發前往東釜山', description: '車程約 30 分鐘', type: 'transport', showOnMap: false },
-      { id: 'day2-item2', order: 2, time: '10:00', title: 'Skyline Luge Busan', description: '玩斜坡滑車', type: 'spot', coords: { lat: 35.195, lng: 129.215 }, naverPlaceId: '1927608921', showOnMap: true },
-      { id: 'day2-item3', order: 3, time: '12:30', title: '午餐：龍宮寺炸醬麵', description: '海東龍宮寺前必吃', type: 'food', naverPlaceId: '11838227', showOnMap: true },
-      { id: 'day2-item4', order: 4, time: '14:00', title: '海東龍宮寺', description: '韓國唯一海邊佛寺', type: 'spot', coords: { lat: 35.188, lng: 129.223 }, naverPlaceId: '11737443', showOnMap: true },
-      { id: 'day2-item5', order: 5, time: '16:00', title: '新世界 SPA LAND', description: '汗蒸幕放鬆 (使用釜山PASS)', type: 'spot', coords: { lat: 35.168, lng: 129.130 }, naverPlaceId: '1964044668', showOnMap: true },
+      { id: 'day2-item1', order: 1, time: '09:30', title: '出發前往東釜山', description: '車程約 30 分鐘', type: 'transport', showOnMap: false, transportToNext: { method: 'taxi', duration: 30, cost: 25000, description: '計程車前往 Luge' } },
+      { id: 'day2-item2', order: 2, time: '10:00', title: 'Skyline Luge Busan', description: '玩斜坡滑車', type: 'spot', coords: { lat: 35.195, lng: 129.215 }, naverPlaceId: '1927608921', showOnMap: true, transportToNext: { method: 'walk', duration: 10, description: '步行至餐廳' } },
+      { id: 'day2-item3', order: 3, time: '12:30', title: '午餐：龍宮寺炸醬麵', description: '海東龍宮寺前必吃', type: 'food', naverPlaceId: '11838227', showOnMap: true, transportToNext: { method: 'walk', duration: 5, description: '步行前往龍宮寺' } },
+      { id: 'day2-item4', order: 4, time: '14:00', title: '海東龍宮寺', description: '韓國唯一海邊佛寺', type: 'spot', coords: { lat: 35.188, lng: 129.223 }, naverPlaceId: '11737443', showOnMap: true, transportToNext: { method: 'taxi', duration: 25, cost: 18000, description: '計程車前往新世界' } },
+      { id: 'day2-item5', order: 5, time: '16:00', title: '新世界 SPA LAND', description: '汗蒸幕放鬆 (使用釜山PASS)', type: 'spot', coords: { lat: 35.168, lng: 129.130 }, naverPlaceId: '1964044668', showOnMap: true, useBusanPass: true },
       { id: 'day2-item6', order: 6, time: '19:00', title: '晚餐', description: '汗蒸幕內簡單吃或新世界百貨美食', type: 'food', showOnMap: false }
     ]
   },
@@ -68,11 +68,11 @@ export const ITINERARY: DaySchedule[] = [
     date: '2/28 (六)',
     title: '海雲台全攻略',
     items: [
-      { id: 'day3-item1', order: 1, time: '10:00', title: '松島海上纜車', description: '跨海纜車體驗 (使用釜山PASS)', type: 'spot', coords: { lat: 35.076, lng: 129.023 }, naverPlaceId: '1962824676', showOnMap: true },
-      { id: 'day3-item2', order: 2, time: '11:30', title: '松島龍宮天空步道', description: '漫步海面之上', type: 'spot', naverPlaceId: '1202664243', showOnMap: true },
-      { id: 'day3-item3', order: 3, time: '13:00', title: '午餐：影島/松島附近', description: '隨選在地美食', type: 'food', showOnMap: false },
-      { id: 'day3-item4', order: 4, time: '14:30', title: '甘川洞文化村', description: '尋找小王子與彩色屋頂', type: 'spot', coords: { lat: 35.097, lng: 129.010 }, naverPlaceId: '21884707', showOnMap: true },
-      { id: 'day3-item5', order: 5, time: '17:00', title: '影島足浴咖啡', description: '邊泡腳邊喝咖啡賞海景', type: 'spot', coords: { lat: 35.079, lng: 129.060 }, showOnMap: true },
+      { id: 'day3-item1', order: 1, time: '10:00', title: '松島海上纜車', description: '跨海纜車體驗 (使用釜山PASS)', type: 'spot', coords: { lat: 35.076, lng: 129.023 }, naverPlaceId: '1962824676', showOnMap: true, useBusanPass: true, transportToNext: { method: 'cable', duration: 15, description: '搭纜車到對岸' } },
+      { id: 'day3-item2', order: 2, time: '11:30', title: '松島龍宮天空步道', description: '漫步海面之上', type: 'spot', naverPlaceId: '1202664243', showOnMap: true, transportToNext: { method: 'walk', duration: 10, description: '步行至附近餐廳' } },
+      { id: 'day3-item3', order: 3, time: '13:00', title: '午餐：影島/松島附近', description: '隨選在地美食', type: 'food', showOnMap: false, transportToNext: { method: 'bus', duration: 20, cost: 1400, description: '公車前往甘川洞' } },
+      { id: 'day3-item4', order: 4, time: '14:30', title: '甘川洞文化村', description: '尋找小王子與彩色屋頂', type: 'spot', coords: { lat: 35.097, lng: 129.010 }, naverPlaceId: '21884707', showOnMap: true, transportToNext: { method: 'taxi', duration: 15, cost: 8000, description: '計程車前往影島' } },
+      { id: 'day3-item5', order: 5, time: '17:00', title: '影島足浴咖啡', description: '邊泡腳邊喝咖啡賞海景', type: 'spot', coords: { lat: 35.079, lng: 129.060 }, showOnMap: true, transportToNext: { method: 'subway', duration: 20, cost: 1400, description: '地鐵前往南浦' } },
       { id: 'day3-item6', order: 6, time: '19:00', title: '晚餐：南浦/札嘎其', description: '國際市場、札嘎其市場小吃', type: 'food', naverPlaceId: '11535750', showOnMap: false }
     ]
   },

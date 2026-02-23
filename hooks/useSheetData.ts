@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DaySchedule, Restaurant, ScheduleItem, Spot } from '../types';
+import { DaySchedule, Restaurant, ScheduleItem, Spot, TransportInfo, TransportMethod } from '../types';
 import { ITINERARY, SPOTS, FOOD } from '../constants';
 
 const SHEET_API_URL =
@@ -53,6 +53,11 @@ type SheetRow = {
   dayTitle?: string;
   showOnMap?: string | boolean;
   useBusanPass?: string | boolean;
+  // Transport fields
+  transportMethod?: string;
+  transportDuration?: string | number;
+  transportCost?: string | number;
+  transportDesc?: string;
 };
 
 const cleanCell = (value?: string) => {
@@ -104,6 +109,7 @@ const deleteById = async (id: string) => postJson({ action: 'delete', id });
 
 const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
   const coords = item.coords;
+  const transport = item.transportToNext;
   const keepText = (value?: string) => value ? `'${value}` : '';
 
   return {
@@ -122,7 +128,11 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
     imageUrl: '',
     category: '',
     showOnMap: item.showOnMap ?? '',
-    useBusanPass: item.useBusanPass ?? ''
+    useBusanPass: item.useBusanPass ?? '',
+    transportMethod: transport?.method || '',
+    transportDuration: transport?.duration || '',
+    transportCost: transport?.cost || '',
+    transportDesc: transport?.description || ''
   };
 };
 
@@ -130,6 +140,15 @@ const sameCoords = (a?: ScheduleItem['coords'], b?: ScheduleItem['coords']) => {
   if (!a && !b) return true;
   if (!a || !b) return false;
   return a.lat === b.lat && a.lng === b.lng;
+};
+
+const sameTransport = (a?: TransportInfo, b?: TransportInfo) => {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.method === b.method &&
+    a.duration === b.duration &&
+    (a.cost || 0) === (b.cost || 0) &&
+    (a.description || '') === (b.description || '');
 };
 
 const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
@@ -141,7 +160,8 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   (a.naverPlaceId || '') === (b.naverPlaceId || '') &&
   sameCoords(a.coords, b.coords) &&
   (a.showOnMap ?? true) === (b.showOnMap ?? true) &&
-  (a.useBusanPass ?? false) === (b.useBusanPass ?? false)
+  (a.useBusanPass ?? false) === (b.useBusanPass ?? false) &&
+  sameTransport(a.transportToNext, b.transportToNext)
 );
 
 // 將 Google Sheets rows 轉換成應用程式資料格式
@@ -161,6 +181,19 @@ const parseSheetRows = (rows: SheetRow[]) => {
     const title = cleanCell(row.dayTitle) || dayTitleMap[dayNum] || '';
     const coords = (row.lat || row.lng) ? { lat: toNumber(row.lat) ?? 0, lng: toNumber(row.lng) ?? 0 } : undefined;
 
+    // Parse transport info
+    let transportToNext: TransportInfo | undefined;
+    const transportMethod = cleanCell(row.transportMethod);
+    const transportDuration = toNumber(row.transportDuration);
+    if (transportMethod && transportDuration) {
+      transportToNext = {
+        method: transportMethod as TransportMethod,
+        duration: transportDuration,
+        cost: toNumber(row.transportCost),
+        description: cleanCell(row.transportDesc) || undefined
+      };
+    }
+
     const item: ScheduleItem = {
       id: row.id,
       order: toNumber(row.order),
@@ -171,7 +204,8 @@ const parseSheetRows = (rows: SheetRow[]) => {
       naverPlaceId: row.naverPlaceId || undefined,
       coords,
       showOnMap: toBoolean(row.showOnMap as string | boolean | undefined),
-      useBusanPass: toBoolean(row.useBusanPass as string | boolean | undefined)
+      useBusanPass: toBoolean(row.useBusanPass as string | boolean | undefined),
+      transportToNext
     };
 
     if (!grouped[dayNum]) {
