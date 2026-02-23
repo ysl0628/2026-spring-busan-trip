@@ -204,8 +204,20 @@ const ItemRow: React.FC<ItemRowProps> = ({
               value={item.naverPlaceId || ''}
               onChange={(event) => onChange({ naverPlaceId: event.target.value })}
               placeholder="Naver Place ID"
-              className="flex-1 min-w-[140px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+              className="flex-1 min-w-[120px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
             />
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-slate-400">₩</span>
+              <input
+                type="number"
+                value={item.cost ?? ''}
+                onChange={(event) => onChange({ cost: event.target.value ? parseInt(event.target.value, 10) : undefined })}
+                onFocus={(event) => event.target.select()}
+                placeholder="費用"
+                min="0"
+                className="w-24 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
             <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer whitespace-nowrap">
               <input
                 type="checkbox"
@@ -213,7 +225,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 onChange={(event) => onChange({ showOnMap: event.target.checked })}
                 className="rounded border-slate-300"
               />
-              <span className="text-xs">地圖顯示</span>
+              <span className="text-xs">地圖</span>
             </label>
             <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer whitespace-nowrap">
               <input
@@ -222,7 +234,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 onChange={(event) => onChange({ useBusanPass: event.target.checked })}
                 className="rounded border-slate-300"
               />
-              <span className="text-xs">釜山PASS</span>
+              <span className="text-xs">PASS</span>
             </label>
             <button
               type="button"

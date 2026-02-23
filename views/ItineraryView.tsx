@@ -4,6 +4,7 @@ import { DaySchedule, ScheduleItem, TransportInfo } from '../types';
 import MiniMap from '../components/MiniMap';
 import DayEditor, { DayEditorHandle } from '../components/DayEditor';
 import TransportEditor, { getTransportIcon, getTransportLabel } from '../components/TransportEditor';
+import CostSummary from '../components/CostSummary';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { getNaverMapLink } from '../utils/naverMap';
 
@@ -84,6 +85,9 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto mt-4 md:mt-0">
+      {/* Cost Summary */}
+      <CostSummary itinerary={itinerary} memberCount={6} />
+
       {/* Transport Editor Dialog */}
       <TransportEditor
         open={transportEditorOpen}

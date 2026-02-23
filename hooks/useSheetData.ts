@@ -53,6 +53,7 @@ type SheetRow = {
   dayTitle?: string;
   showOnMap?: string | boolean;
   useBusanPass?: string | boolean;
+  cost?: string | number; // 行程費用（門票、餐費等）
   // Transport fields
   transportMethod?: string;
   transportDuration?: string | number;
@@ -129,6 +130,7 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
     category: '',
     showOnMap: item.showOnMap ?? '',
     useBusanPass: item.useBusanPass ?? '',
+    cost: item.cost || '',
     transportMethod: transport?.method || '',
     transportDuration: transport?.duration || '',
     transportCost: transport?.cost || '',
@@ -161,6 +163,7 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   sameCoords(a.coords, b.coords) &&
   (a.showOnMap ?? true) === (b.showOnMap ?? true) &&
   (a.useBusanPass ?? false) === (b.useBusanPass ?? false) &&
+  (a.cost || 0) === (b.cost || 0) &&
   sameTransport(a.transportToNext, b.transportToNext)
 );
 
@@ -205,6 +208,7 @@ const parseSheetRows = (rows: SheetRow[]) => {
       coords,
       showOnMap: toBoolean(row.showOnMap as string | boolean | undefined),
       useBusanPass: toBoolean(row.useBusanPass as string | boolean | undefined),
+      cost: toNumber(row.cost),
       transportToNext
     };
 

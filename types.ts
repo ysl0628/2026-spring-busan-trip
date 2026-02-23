@@ -64,6 +64,7 @@ export interface ScheduleItem {
   showOnMap?: boolean;
   useBusanPass?: boolean;
   transportToNext?: TransportInfo; // 到下一個點的交通方式
+  cost?: number; // 預估費用（韓元）- 門票、餐費等
 }
 
 export interface DaySchedule {
