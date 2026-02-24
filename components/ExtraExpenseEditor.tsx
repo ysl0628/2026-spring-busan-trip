@@ -392,7 +392,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => !isSaving && !isLocalSaving && setIsDialogOpen(open)}>
-        <DialogContent className="flex flex-col w-full max-w-md max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
+        <DialogContent className="flex flex-col w-full max-w-md h-[90vh] sm:h-fit sm:max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
           <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
             <DialogTitle>{editingExpense ? '編輯費用' : '新增額外費用'}</DialogTitle>
           </DialogHeader>
@@ -551,14 +551,14 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
       </Dialog>
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !isLocalSaving && !open && setDeleteTarget(null)}>
-        <DialogContent className="flex flex-col w-full max-w-sm overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
-          <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
+        <DialogContent className="w-full max-w-sm h-fit overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0 p-0">
+          <DialogHeader className="px-6 py-4">
             <DialogTitle>確認刪除</DialogTitle>
           </DialogHeader>
-          <p className="px-6 py-4 text-sm text-slate-600">
+          <p className="px-6 pb-4 text-sm text-slate-600">
             確定要刪除這筆費用嗎？此操作無法復原。
           </p>
-          <DialogFooter className="shrink-0 border-t border-slate-100 px-6 py-4">
+          <DialogFooter className="border-t border-slate-100 px-6 py-4">
             <button
               type="button"
               onClick={() => setDeleteTarget(null)}

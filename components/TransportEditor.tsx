@@ -76,7 +76,7 @@ const TransportEditor: React.FC<TransportEditorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !isSaving && onOpenChange(open)}>
-      <DialogContent className="flex flex-col w-full max-w-md max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
+      <DialogContent className="flex flex-col w-full max-w-md h-[90vh] sm:h-fit sm:max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
         <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
           <DialogTitle className="text-lg">編輯交通方式</DialogTitle>
         </DialogHeader>
