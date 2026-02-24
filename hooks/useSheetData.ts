@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DaySchedule, Restaurant, ScheduleItem, Spot, TransportInfo, TransportMethod } from '../types';
+import { DaySchedule, ExtraExpense, Restaurant, ScheduleItem, Spot, TransportInfo, TransportMethod } from '../types';
 import { ITINERARY, SPOTS, FOOD } from '../constants';
 
 const SHEET_API_URL =
@@ -32,7 +32,8 @@ const setOfflineMode = (enabled: boolean): void => {
 const STORAGE_KEYS = {
   ITINERARY: 'trip_itinerary',
   SPOTS: 'trip_spots',
-  FOOD: 'trip_food'
+  FOOD: 'trip_food',
+  EXTRA_EXPENSES: 'trip_extra_expenses'
 };
 
 type SheetRow = {
@@ -54,6 +55,7 @@ type SheetRow = {
   showOnMap?: string | boolean;
   useBusanPass?: string | boolean;
   cost?: string | number; // 行程費用（門票、餐費等）
+  splitCount?: string | number; // 分攤人數
   // Transport fields
   transportMethod?: string;
   transportDuration?: string | number;
@@ -106,7 +108,7 @@ const postJson = async (payload: Record<string, unknown>) => {
   }
 };
 
-const deleteById = async (id: string) => postJson({ action: 'delete', id });
+const deleteById = async (id: string, sheet?: string) => postJson({ action: 'delete', id, sheet });
 
 const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
   const coords = item.coords;
@@ -131,6 +133,7 @@ const toSheetRow = (day: DaySchedule, item: ScheduleItem, order: number) => {
     showOnMap: item.showOnMap ?? '',
     useBusanPass: item.useBusanPass ?? '',
     cost: item.cost || '',
+    splitCount: item.splitCount || '',
     transportMethod: transport?.method || '',
     transportDuration: transport?.duration || '',
     transportCost: transport?.cost || '',
@@ -164,8 +167,51 @@ const sameItem = (a: ScheduleItem, b: ScheduleItem) => (
   (a.showOnMap ?? true) === (b.showOnMap ?? true) &&
   (a.useBusanPass ?? false) === (b.useBusanPass ?? false) &&
   (a.cost || 0) === (b.cost || 0) &&
+  (a.splitCount || 0) === (b.splitCount || 0) &&
   sameTransport(a.transportToNext, b.transportToNext)
 );
+
+type ExpenseRow = {
+  id?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  cost?: string | number;
+  currency?: string;
+  splitCount?: string | number;
+  paidBy?: string;
+  date?: string;
+  recordedBy?: string;
+};
+
+const parseExpenseRows = (rows: ExpenseRow[]): ExtraExpense[] => {
+  return rows.filter(row => row.id).map(row => ({
+    id: row.id as string,
+    title: cleanCell(row.title) || '',
+    description: cleanCell(row.description),
+    category: (row.category as ExtraExpense['category']) || 'other',
+    cost: toNumber(row.cost) || 0,
+    currency: (row.currency as 'KRW' | 'TWD') || 'KRW',
+    splitCount: toNumber(row.splitCount),
+    paidBy: cleanCell(row.paidBy),
+    date: cleanCell(row.date),
+    recordedBy: cleanCell(row.recordedBy),
+  }));
+};
+
+const toExpenseRow = (expense: ExtraExpense) => ({
+  id: expense.id,
+  title: expense.title,
+  description: expense.description || '',
+  category: expense.category,
+  cost: expense.cost,
+  currency: expense.currency,
+  splitCount: expense.splitCount || '',
+  paidBy: expense.paidBy || '',
+  date: expense.date || '',
+  recordedBy: expense.recordedBy || '',
+  sheet: 'expenses',
+});
 
 // 將 Google Sheets rows 轉換成應用程式資料格式
 const parseSheetRows = (rows: SheetRow[]) => {
@@ -209,6 +255,7 @@ const parseSheetRows = (rows: SheetRow[]) => {
       showOnMap: toBoolean(row.showOnMap as string | boolean | undefined),
       useBusanPass: toBoolean(row.useBusanPass as string | boolean | undefined),
       cost: toNumber(row.cost),
+      splitCount: toNumber(row.splitCount),
       transportToNext
     };
 
@@ -292,6 +339,7 @@ export const useSheetData = () => {
   const [itinerary, setItinerary] = useState<DaySchedule[]>([]);
   const [spots, setSpots] = useState<Spot[]>([]);
   const [food, setFood] = useState<Restaurant[]>([]);
+  const [extraExpenses, setExtraExpenses] = useState<ExtraExpense[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -315,10 +363,12 @@ export const useSheetData = () => {
           const storedItinerary = loadFromStorage<DaySchedule[]>(STORAGE_KEYS.ITINERARY, ITINERARY);
           const storedSpots = loadFromStorage<Spot[]>(STORAGE_KEYS.SPOTS, SPOTS);
           const storedFood = loadFromStorage<Restaurant[]>(STORAGE_KEYS.FOOD, FOOD);
+          const storedExpenses = loadFromStorage<ExtraExpense[]>(STORAGE_KEYS.EXTRA_EXPENSES, []);
           
           setItinerary(storedItinerary);
           setSpots(storedSpots);
           setFood(storedFood);
+          setExtraExpenses(storedExpenses);
           setLoadError('');
           setIsLoading(false);
           return;
@@ -331,12 +381,15 @@ export const useSheetData = () => {
         }
         const payload = await response.json();
         const rows = Array.isArray(payload?.data) ? payload.data as SheetRow[] : [];
+        const expenseRows = Array.isArray(payload?.expenses) ? payload.expenses as ExpenseRow[] : [];
 
         const { itineraryData, spotData, foodData } = parseSheetRows(rows);
+        const expensesData = parseExpenseRows(expenseRows);
 
         setItinerary(itineraryData);
         setSpots(spotData);
         setFood(foodData);
+        setExtraExpenses(expensesData);
         setLoadError('');
       } catch (error) {
         setLoadError('Failed to load sheet data.');
@@ -347,6 +400,50 @@ export const useSheetData = () => {
 
     loadSheet();
   }, [isOfflineMode]);
+
+  const saveExtraExpenses = async (expenses: ExtraExpense[]) => {
+    // 離線模式：只存 localStorage
+    if (isOfflineMode) {
+      setExtraExpenses(expenses);
+      saveToStorage(STORAGE_KEYS.EXTRA_EXPENSES, expenses);
+      return;
+    }
+
+    // 線上模式：同步到 Google Sheets
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      const currentIds = extraExpenses.map(e => e.id);
+      const nextIds = new Set(expenses.map(e => e.id));
+
+      // 刪除已移除的
+      for (const id of currentIds) {
+        if (!nextIds.has(id)) {
+          await deleteById(id, 'expenses');
+        }
+      }
+
+      // 新增或更新
+      for (const expense of expenses) {
+        const existing = extraExpenses.find(e => e.id === expense.id);
+        const isNew = !existing;
+        const isChanged = existing && JSON.stringify(existing) !== JSON.stringify(expense);
+        
+        if (isNew || isChanged) {
+          await postJson(toExpenseRow(expense));
+        }
+      }
+
+      setExtraExpenses(expenses);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save expenses.';
+      setSaveError(message);
+      // eslint-disable-next-line no-console
+      console.error('Save expenses failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const saveDay = async (day: DaySchedule) => {
     setIsSaving(true);
@@ -475,17 +572,22 @@ export const useSheetData = () => {
       const payload = await response.json();
       const rows = Array.isArray(payload?.data) ? payload.data as SheetRow[] : [];
 
+      const expenseRows = Array.isArray(payload?.expenses) ? payload.expenses as ExpenseRow[] : [];
+
       const { itineraryData, spotData, foodData } = parseSheetRows(rows);
+      const expensesData = parseExpenseRows(expenseRows);
 
       // 儲存到 localStorage
       saveToStorage(STORAGE_KEYS.ITINERARY, itineraryData);
       saveToStorage(STORAGE_KEYS.SPOTS, spotData);
       saveToStorage(STORAGE_KEYS.FOOD, foodData);
+      saveToStorage(STORAGE_KEYS.EXTRA_EXPENSES, expensesData);
 
       // 更新 state
       setItinerary(itineraryData);
       setSpots(spotData);
       setFood(foodData);
+      setExtraExpenses(expensesData);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to sync from sheets.';
       setSaveError(message);
@@ -499,13 +601,15 @@ export const useSheetData = () => {
   return { 
     itinerary, 
     spots, 
-    food, 
+    food,
+    extraExpenses,
     isLoading, 
     loadError, 
     isSaving, 
     saveError, 
     saveDay, 
     deleteDay,
+    saveExtraExpenses,
     isOfflineMode,
     toggleOfflineMode,
     syncFromSheets

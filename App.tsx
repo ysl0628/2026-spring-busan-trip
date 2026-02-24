@@ -7,7 +7,8 @@ import {
   Utensils, 
   Info,
   Wifi,
-  WifiOff
+  WifiOff,
+  Wallet
 } from 'lucide-react';
 import { TabType } from './types';
 import { FLIGHTS, MEMBERS } from './constants';
@@ -18,13 +19,14 @@ import FlightsView from './views/FlightsView';
 import ItineraryView from './views/ItineraryView';
 import SpotsView from './views/SpotsView';
 import FoodView from './views/FoodView';
+import BudgetView from './views/BudgetView';
 import InfoView from './views/InfoView';
 import { useSheetData } from './hooks/useSheetData';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.ITINERARY);
   const [expandedDay, setExpandedDay] = useState<number>(1);
-  const { itinerary, spots, food, isLoading, loadError, isSaving, saveError, saveDay, isOfflineMode, toggleOfflineMode, syncFromSheets } = useSheetData();
+  const { itinerary, spots, food, extraExpenses, isLoading, loadError, isSaving, saveError, saveDay, saveExtraExpenses, isOfflineMode, toggleOfflineMode, syncFromSheets } = useSheetData();
 
   const renderContent = () => {
     if (isLoading) {
@@ -61,6 +63,16 @@ const App: React.FC = () => {
         return <SpotsView spots={spots} />;
       case TabType.FOOD:
         return <FoodView food={food} />;
+      case TabType.BUDGET:
+        return (
+          <BudgetView
+            itinerary={itinerary}
+            extraExpenses={extraExpenses}
+            onSaveExtraExpenses={saveExtraExpenses}
+            isSaving={isSaving}
+            isOfflineMode={isOfflineMode}
+          />
+        );
       case TabType.INFO:
         return <InfoView members={MEMBERS} />;
     }
@@ -79,6 +91,7 @@ const App: React.FC = () => {
           <SidebarItem icon={<Plane />} label="飛行資訊" isActive={activeTab === TabType.FLIGHT} onClick={() => setActiveTab(TabType.FLIGHT)} />
           <SidebarItem icon={<MapPin />} label="必訪景點" isActive={activeTab === TabType.SPOTS} onClick={() => setActiveTab(TabType.SPOTS)} />
           <SidebarItem icon={<Utensils />} label="釜山美食" isActive={activeTab === TabType.FOOD} onClick={() => setActiveTab(TabType.FOOD)} />
+          <SidebarItem icon={<Wallet />} label="費用預估" isActive={activeTab === TabType.BUDGET} onClick={() => setActiveTab(TabType.BUDGET)} />
           <SidebarItem icon={<Info />} label="行前必知" isActive={activeTab === TabType.INFO} onClick={() => setActiveTab(TabType.INFO)} />
         </nav>
         <div className="p-6 border-t border-slate-100 hidden lg:block space-y-4">
@@ -135,6 +148,7 @@ const App: React.FC = () => {
                 {activeTab === TabType.FLIGHT && '飛行資訊'}
                 {activeTab === TabType.SPOTS && '必訪景點'}
                 {activeTab === TabType.FOOD && '釜山美食'}
+                {activeTab === TabType.BUDGET && '費用預估'}
                 {activeTab === TabType.INFO && '行前必知'}
               </h2>
             </div>
@@ -184,11 +198,12 @@ const App: React.FC = () => {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200 z-50">
-        <div className="px-6 h-14 flex justify-between items-center">
+        <div className="px-4 h-14 flex justify-between items-center">
           <NavItem icon={<Calendar className="w-6 h-6" />} isActive={activeTab === TabType.ITINERARY} onClick={() => setActiveTab(TabType.ITINERARY)} />
           <NavItem icon={<Plane className="w-6 h-6" />} isActive={activeTab === TabType.FLIGHT} onClick={() => setActiveTab(TabType.FLIGHT)} />
           <NavItem icon={<MapPin className="w-6 h-6" />} isActive={activeTab === TabType.SPOTS} onClick={() => setActiveTab(TabType.SPOTS)} />
           <NavItem icon={<Utensils className="w-6 h-6" />} isActive={activeTab === TabType.FOOD} onClick={() => setActiveTab(TabType.FOOD)} />
+          <NavItem icon={<Wallet className="w-6 h-6" />} isActive={activeTab === TabType.BUDGET} onClick={() => setActiveTab(TabType.BUDGET)} />
           <NavItem icon={<Info className="w-6 h-6" />} isActive={activeTab === TabType.INFO} onClick={() => setActiveTab(TabType.INFO)} />
         </div>
       </nav>

@@ -4,7 +4,6 @@ import { DaySchedule, ScheduleItem, TransportInfo } from '../types';
 import MiniMap from '../components/MiniMap';
 import DayEditor, { DayEditorHandle } from '../components/DayEditor';
 import TransportEditor, { getTransportIcon, getTransportLabel } from '../components/TransportEditor';
-import CostSummary from '../components/CostSummary';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { getNaverMapLink } from '../utils/naverMap';
 
@@ -85,9 +84,6 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto mt-4 md:mt-0">
-      {/* Cost Summary */}
-      <CostSummary itinerary={itinerary} memberCount={6} />
-
       {/* Transport Editor Dialog */}
       <TransportEditor
         open={transportEditorOpen}
@@ -123,7 +119,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
               disabled={isSaving}
               className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Cancel
+              取消
             </button>
             <button
               type="button"
@@ -131,7 +127,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
               disabled={isSaving}
               className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
             >
-              {isSaving ? 'Saving...' : 'Save Day'}
+              {isSaving ? '儲存中...' : '儲存'}
             </button>
           </DialogFooter>
         </DialogContent>

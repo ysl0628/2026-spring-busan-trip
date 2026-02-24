@@ -65,6 +65,23 @@ export interface ScheduleItem {
   useBusanPass?: boolean;
   transportToNext?: TransportInfo; // 到下一個點的交通方式
   cost?: number; // 預估費用（韓元）- 門票、餐費等
+  splitCount?: number; // 分攤人數（預設為總人數）
+}
+
+// 額外費用類型（行程外的事前支出或其他支出）
+export type ExtraExpenseCategory = 'flight' | 'hotel' | 'insurance' | 'pass' | 'prepaid' | 'other';
+
+export interface ExtraExpense {
+  id: string;
+  title: string;
+  description?: string;
+  category: ExtraExpenseCategory;
+  cost: number; // 韓元或台幣
+  currency: 'KRW' | 'TWD';
+  splitCount?: number; // 分攤人數（預設為總人數）
+  paidBy?: string; // 誰先付的
+  date?: string; // 支出日期
+  recordedBy?: string; // 記錄者
 }
 
 export interface DaySchedule {
@@ -85,5 +102,6 @@ export enum TabType {
   FLIGHT = 'flight',
   SPOTS = 'spots',
   FOOD = 'food',
+  BUDGET = 'budget',
   INFO = 'info'
 }

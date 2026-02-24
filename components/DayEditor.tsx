@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+﻿import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
@@ -218,6 +218,19 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 className="w-24 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={item.splitCount ?? ''}
+                onChange={(event) => onChange({ splitCount: event.target.value ? parseInt(event.target.value, 10) : undefined })}
+                onFocus={(event) => event.target.select()}
+                placeholder="人"
+                min="1"
+                max="6"
+                className="w-16 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <span className="text-xs text-slate-400">人分</span>
+            </div>
             <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 cursor-pointer whitespace-nowrap">
               <input
                 type="checkbox"
@@ -354,7 +367,7 @@ const DayEditor = React.forwardRef<DayEditorHandle, DayEditorProps>(({ day, isSa
           }}
           className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
         >
-          Add Item
+          新增行程
         </button>
       </div>
     </div>
