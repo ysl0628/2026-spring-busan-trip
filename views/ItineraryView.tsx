@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, MapPin, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Pencil, X, Check } from 'lucide-react';
 import { DaySchedule, ScheduleItem, TransportInfo } from '../types';
 import MiniMap from '../components/MiniMap';
 import DayEditor, { DayEditorHandle } from '../components/DayEditor';
@@ -96,11 +96,40 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
       />
 
       <Dialog open={!!activeEditorDay} onOpenChange={(open) => !isSaving && !open && setActiveEditorDay(null)}>
-        <DialogContent className="flex flex-col w-full max-w-3xl h-[92vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
-          <DialogHeader className="shrink-0 border-b border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
+        <DialogContent className="flex flex-col w-full h-full sm:h-fit sm:max-h-[90vh] sm:max-w-3xl overflow-hidden rounded-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-0 bottom-0 translate-y-0 p-0">
+          {/* Mobile Header with actions */}
+          <DialogHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur sm:hidden">
+            <button
+              type="button"
+              onClick={() => setActiveEditorDay(null)}
+              disabled={isSaving}
+              className="p-2 -ml-2 text-slate-500 hover:text-slate-700 disabled:opacity-50"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <DialogTitle className="text-base font-bold">
+              編輯 Day {activeEditorDay?.day ?? ''}
+            </DialogTitle>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="p-2 -mr-2 text-blue-600 hover:text-blue-700 disabled:opacity-50"
+            >
+              {isSaving ? (
+                <span className="text-sm font-bold">...</span>
+              ) : (
+                <Check className="w-6 h-6" />
+              )}
+            </button>
+          </DialogHeader>
+
+          {/* Desktop Header */}
+          <DialogHeader className="hidden sm:block shrink-0 border-b border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
             <DialogTitle>Edit Day {activeEditorDay?.day ?? ''}</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
             {activeEditorDay && (
               <DayEditor
                 ref={editorRef}
@@ -112,7 +141,9 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
               />
             )}
           </div>
-          <DialogFooter className="shrink-0 border-t border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
+
+          {/* Desktop Footer */}
+          <DialogFooter className="hidden sm:flex shrink-0 border-t border-slate-100 bg-white/95 px-6 py-4 backdrop-blur">
             <button
               type="button"
               onClick={() => setActiveEditorDay(null)}

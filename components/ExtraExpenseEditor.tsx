@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Plane, Building, Shield, Ticket, CreditCard, MoreHorizontal, Plus, Trash2, Edit2, Filter } from 'lucide-react';
+import { Plane, Building, Shield, Ticket, CreditCard, MoreHorizontal, Plus, Trash2, Edit2, Filter, X, Check } from 'lucide-react';
 import { ExtraExpense, ExtraExpenseCategory } from '../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -392,12 +392,40 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => !isSaving && !isLocalSaving && setIsDialogOpen(open)}>
-        <DialogContent className="flex flex-col w-full max-w-md h-[90vh] sm:h-fit sm:max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
-          <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
+        <DialogContent className="flex flex-col w-full h-full sm:h-fit sm:max-h-[90vh] sm:max-w-md overflow-hidden rounded-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-0 bottom-0 translate-y-0 p-0">
+          {/* Mobile Header with actions */}
+          <DialogHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 px-4 py-3 sm:hidden">
+            <button
+              type="button"
+              onClick={() => setIsDialogOpen(false)}
+              disabled={isSaving || isLocalSaving}
+              className="p-2 -ml-2 text-slate-500 hover:text-slate-700 disabled:opacity-50"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <DialogTitle className="text-base font-bold">
+              {editingExpense ? '編輯費用' : '新增額外費用'}
+            </DialogTitle>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving || isLocalSaving || !formData.title || !formData.cost}
+              className="p-2 -mr-2 text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+            >
+              {isLocalSaving ? (
+                <span className="text-sm font-bold">...</span>
+              ) : (
+                <Check className="w-6 h-6" />
+              )}
+            </button>
+          </DialogHeader>
+
+          {/* Desktop Header */}
+          <DialogHeader className="hidden sm:block shrink-0 border-b border-slate-100 px-6 py-4">
             <DialogTitle>{editingExpense ? '編輯費用' : '新增額外費用'}</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">名稱 *</label>
               <input
@@ -529,7 +557,8 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
             </div>
           </div>
 
-          <DialogFooter className="shrink-0 border-t border-slate-100 px-6 py-4">
+          {/* Desktop Footer */}
+          <DialogFooter className="hidden sm:flex shrink-0 border-t border-slate-100 px-6 py-4">
             <button
               type="button"
               onClick={() => setIsDialogOpen(false)}
@@ -551,7 +580,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
       </Dialog>
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !isLocalSaving && !open && setDeleteTarget(null)}>
-        <DialogContent className="w-full max-w-sm h-fit overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0 p-0">
+        <DialogContent className="w-[90%] max-w-sm h-fit overflow-hidden rounded-3xl top-1/2 -translate-y-1/2 p-0">
           <DialogHeader className="px-6 py-4">
             <DialogTitle>確認刪除</DialogTitle>
           </DialogHeader>

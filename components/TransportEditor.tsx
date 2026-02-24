@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Bus, Train, PersonStanding, Car, CableCar, MoreHorizontal } from 'lucide-react';
+import { X, Bus, Train, PersonStanding, Car, CableCar, MoreHorizontal, Check } from 'lucide-react';
 import { TransportInfo, TransportMethod } from '../types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 
 type TransportEditorProps = {
   open: boolean;
@@ -76,12 +76,38 @@ const TransportEditor: React.FC<TransportEditorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !isSaving && onOpenChange(open)}>
-      <DialogContent className="flex flex-col w-full max-w-md h-[90vh] sm:h-fit sm:max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
-        <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
+      <DialogContent className="flex flex-col w-full h-full sm:h-fit sm:max-h-[90vh] sm:max-w-md overflow-hidden rounded-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-0 bottom-0 translate-y-0 p-0">
+        {/* Mobile Header with actions */}
+        <DialogHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 px-4 py-3 sm:hidden">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            disabled={isSaving}
+            className="p-2 -ml-2 text-slate-500 hover:text-slate-700 disabled:opacity-50"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <DialogTitle className="text-base font-bold">編輯交通方式</DialogTitle>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="p-2 -mr-2 text-blue-600 hover:text-blue-700 disabled:opacity-50"
+          >
+            {isSaving ? (
+              <span className="text-sm font-bold">...</span>
+            ) : (
+              <Check className="w-6 h-6" />
+            )}
+          </button>
+        </DialogHeader>
+
+        {/* Desktop Header */}
+        <DialogHeader className="hidden sm:block shrink-0 border-b border-slate-100 px-6 py-4">
           <DialogTitle className="text-lg">編輯交通方式</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-5">
           {/* 路線顯示 */}
           <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50 rounded-xl px-4 py-3">
             <span className="font-medium truncate flex-1">{fromTitle}</span>
@@ -160,9 +186,22 @@ const TransportEditor: React.FC<TransportEditorProps> = ({
               className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
+
+          {/* Mobile: 清除按鈕 */}
+          {transport && (
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={isSaving}
+              className="sm:hidden w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              清除交通資訊
+            </button>
+          )}
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-slate-100 px-6 py-4">
+        {/* Desktop Footer */}
+        <DialogFooter className="hidden sm:flex shrink-0 border-t border-slate-100 px-6 py-4">
           {transport && (
             <button
               type="button"
