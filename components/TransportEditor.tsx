@@ -76,12 +76,12 @@ const TransportEditor: React.FC<TransportEditorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !isSaving && onOpenChange(open)}>
-      <DialogContent className="w-full max-w-md rounded-2xl p-4">
-        <DialogHeader>
+      <DialogContent className="flex flex-col w-full max-w-md max-h-[90vh] overflow-hidden rounded-t-3xl rounded-b-none sm:rounded-3xl sm:top-1/2 sm:-translate-y-1/2 top-auto bottom-0 translate-y-0">
+        <DialogHeader className="shrink-0 border-b border-slate-100 px-6 py-4">
           <DialogTitle className="text-lg">編輯交通方式</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
           {/* 路線顯示 */}
           <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50 rounded-xl px-4 py-3">
             <span className="font-medium truncate flex-1">{fromTitle}</span>
@@ -162,7 +162,7 @@ const TransportEditor: React.FC<TransportEditorProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="shrink-0 border-t border-slate-100 px-6 py-4">
           {transport && (
             <button
               type="button"
