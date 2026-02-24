@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DaySchedule, ScheduleItem } from '../types';
@@ -154,7 +154,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                   type="time"
                   value={item.time}
                   onChange={(event) => onChange({ time: event.target.value })}
-                  className="w-full min-w-[130px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                  className="w-full min-w-[130px] rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
                 />
               </div>
               <div>
@@ -182,7 +182,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                   value={item.title}
                   onChange={(event) => onChange({ title: event.target.value })}
                   placeholder="行程名稱"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
                 />
               </div>
             </div>
@@ -193,7 +193,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 onChange={(event) => onChange({ description: event.target.value })}
                 placeholder="詳細說明..."
                 rows={2}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 resize-none"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700 resize-none"
               />
             </div>
           </div>
@@ -204,7 +204,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               value={item.naverPlaceId || ''}
               onChange={(event) => onChange({ naverPlaceId: event.target.value })}
               placeholder="Naver Place ID"
-              className="flex-1 min-w-[120px] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+              className="flex-1 min-w-[120px] rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
             />
             <div className="flex items-center gap-1">
               <span className="text-xs text-slate-400">₩</span>
@@ -215,7 +215,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 onFocus={(event) => event.target.select()}
                 placeholder="費用"
                 min="0"
-                className="w-24 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-24 rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-1">
@@ -227,7 +227,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 placeholder="人"
                 min="1"
                 max="6"
-                className="w-16 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-16 rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <span className="text-xs text-slate-400">人分</span>
             </div>

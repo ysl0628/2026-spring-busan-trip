@@ -433,7 +433,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                 value={formData.title || ''}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="例：機票、住宿訂金"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
               />
             </div>
 
@@ -484,7 +484,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                   onFocus={(e) => e.target.select()}
                   placeholder="0"
                   min="0"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
                 />
               </div>
               <div>
@@ -496,7 +496,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                   onFocus={(e) => e.target.select()}
                   min="1"
                   max={memberCount}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
                 />
               </div>
             </div>
@@ -508,7 +508,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="選填"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
               />
             </div>
 
@@ -519,7 +519,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                   type="date"
                   value={formData.date || ''}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
                 />
               </div>
               <div>
