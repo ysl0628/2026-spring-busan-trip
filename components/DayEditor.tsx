@@ -186,16 +186,6 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">備註</label>
-              <textarea
-                value={item.description}
-                onChange={(event) => onChange({ description: event.target.value })}
-                placeholder="詳細說明..."
-                rows={2}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700 resize-none"
-              />
-            </div>
           </div>
 
           {/* 地點與選項 */}
@@ -256,6 +246,17 @@ const ItemRow: React.FC<ItemRowProps> = ({
             >
               移除
             </button>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">備註</label>
+            <textarea
+              value={item.description}
+              onChange={(event) => onChange({ description: event.target.value })}
+              placeholder="詳細說明..."
+              rows={2}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700 resize-none"
+            />
           </div>
         </div>
       )}

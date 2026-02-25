@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, MapPin, Pencil, X, Check } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, MapPin, Pencil, X, Check, Info } from 'lucide-react';
 import { DaySchedule, ScheduleItem, TransportInfo } from '../types';
 import MiniMap from '../components/MiniMap';
 import DayEditor, { DayEditorHandle } from '../components/DayEditor';
@@ -32,6 +32,8 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
   
   // Transport editor state
   const [transportEditorOpen, setTransportEditorOpen] = useState(false);
+  const [openTransportInfo, setOpenTransportInfo] = useState<{ key: string; description: string } | null>(null);
+
   const [editingTransport, setEditingTransport] = useState<{
     dayIndex: number;
     itemIndex: number;
@@ -214,7 +216,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
                             <div className="w-0.5 flex-1 bg-slate-200 my-1 rounded-full min-h-[20px]" />
                           )}
                         </div>
-                        <div className="flex-1 pb-2">
+                        <div className="flex-1 min-w-0 pb-2">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-bold text-slate-400 font-mono tracking-tighter">{item.time}</span>
                             {(item.naverPlaceId || item.coords) && (
@@ -229,7 +231,7 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="font-bold text-slate-800 text-lg leading-tight">{item.title}</h4>
+                            <h4 className="font-bold text-slate-800 text-lg leading-tight break-words">{item.title}</h4>
                             {item.useBusanPass && (
                               <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
                                 Busan Pass
@@ -246,28 +248,50 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
                           <div className="flex flex-col items-center w-3">
                             <div className="w-0.5 h-full bg-slate-200 rounded-full" />
                           </div>
-                          <div className="flex-1 py-2">
+                          <div className="flex-1 min-w-0 py-2 relative">
                             {item.transportToNext ? (
-                              <button
-                                type="button"
-                                onClick={() => !isOfflineMode && handleTransportEdit(itinerary.indexOf(day), idx, day.items)}
-                                disabled={isOfflineMode}
-                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-all ${
-                                  isOfflineMode
-                                    ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default'
-                                    : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 cursor-pointer'
-                                }`}
-                              >
-                                {getTransportIcon(item.transportToNext.method)}
-                                <span className="font-medium">{getTransportLabel(item.transportToNext.method)}</span>
-                                <span className="text-blue-500">{item.transportToNext.duration}分</span>
-                                {item.transportToNext.cost && (
-                                  <span className="text-blue-400">₩{item.transportToNext.cost.toLocaleString()}</span>
-                                )}
+                              <div className="inline-flex flex-wrap items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => !isOfflineMode && handleTransportEdit(itinerary.indexOf(day), idx, day.items)}
+                                  disabled={isOfflineMode}
+                                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-all ${
+                                    isOfflineMode
+                                      ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default'
+                                      : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 cursor-pointer'
+                                  }`}
+                                >
+                                  {getTransportIcon(item.transportToNext.method)}
+                                  <span className="font-medium">{getTransportLabel(item.transportToNext.method)}</span>
+                                  <span className="text-blue-500">{item.transportToNext.duration}分</span>
+                                  {item.transportToNext.cost && (
+                                    <span className="text-blue-400">₩{item.transportToNext.cost.toLocaleString()}</span>
+                                  )}
+                                  {item.transportToNext.description && (
+                                    <span className="text-blue-400 hidden sm:inline">· {item.transportToNext.description}</span>
+                                  )}
+                                </button>
                                 {item.transportToNext.description && (
-                                  <span className="text-blue-400 hidden sm:inline">· {item.transportToNext.description}</span>
+                                  <span className="sm:hidden inline-flex">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const key = `${day.day}-${idx}`;
+                                        setOpenTransportInfo(
+                                          openTransportInfo?.key === key
+                                            ? null
+                                            : { key, description: item.transportToNext!.description! }
+                                        );
+                                      }}
+                                      className="p-1 rounded-full text-blue-400 hover:bg-blue-100 hover:text-blue-600"
+                                      aria-label="查看備註"
+                                    >
+                                      <Info className="w-4 h-4" />
+                                    </button>
+                                  </span>
                                 )}
-                              </button>
+                              </div>
                             ) : (
                               !isOfflineMode && (
                                 <button
@@ -294,6 +318,17 @@ const ItineraryView: React.FC<ItineraryViewProps> = ({
           )}
         </div>
       ))}
+
+      <Dialog open={!!openTransportInfo} onOpenChange={(open) => !open && setOpenTransportInfo(null)}>
+        <DialogContent className="w-[90%] max-w-sm p-0 gap-0 rounded-3xl">
+          <DialogHeader className="px-6 py-4 border-b border-slate-100">
+            <DialogTitle className="text-base">交通備註</DialogTitle>
+          </DialogHeader>
+          <p className="px-6 py-4 text-sm text-slate-600">
+            {openTransportInfo?.description}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

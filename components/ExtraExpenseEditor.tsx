@@ -262,7 +262,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                     {/* 內容區 */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-slate-800">{expense.title}</span>
+                        <span className="font-semibold text-slate-800 break-words">{expense.title}</span>
                         <span className={`text-[11px] px-1.5 py-0.5 rounded bg-${color}-50 text-${color}-600`}>
                           {getCategoryLabel(expense.category)}
                         </span>
@@ -501,18 +501,7 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">備註</label>
-              <input
-                type="text"
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="選填"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">日期</label>
                 <input
@@ -554,6 +543,17 @@ const ExtraExpenseEditor: React.FC<ExtraExpenseEditorProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">備註</label>
+              <input
+                type="text"
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="選填"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-base sm:text-sm text-slate-700"
+              />
             </div>
           </div>
 
